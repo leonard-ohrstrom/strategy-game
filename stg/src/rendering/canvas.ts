@@ -2,8 +2,8 @@ export const canvas: HTMLCanvasElement = document.querySelector('canvas')!;
 export const context: CanvasRenderingContext2D = canvas.getContext('2d')!;
 
 export function fit_canvas_to_browser() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth - 3;
+    canvas.height = window.innerHeight - 3;
 
     console.log(canvas);
     console.log("innerWidth:", window.innerWidth)
