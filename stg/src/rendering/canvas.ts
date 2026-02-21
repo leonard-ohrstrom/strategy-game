@@ -1,20 +1,39 @@
+import { makeVector, type Vector } from "../types/types";
+
 export const canvas: HTMLCanvasElement = document.querySelector('canvas')!;
 export const context: CanvasRenderingContext2D = canvas.getContext('2d')!;
 
-export function fit_canvas_to_browser() {
-    canvas.width = window.innerWidth - 3;
-    canvas.height = window.innerHeight - 3;
+let width: number = 0;
+let height: number = 0;
 
-    console.log(canvas);
-    console.log("innerWidth:", window.innerWidth)
-    console.log("innerHeight:", window.innerHeight)
+export function fitCanvasToBrowser() {
+    width = window.innerWidth - 3;
+    height = window.innerHeight - 3;
+
+    canvas.width = width;
+    canvas.height = height;
 }
 
-export function set_canvas_dimensions(input_width: number, input_height: number) {
-    canvas.width = input_width;
-    canvas.height = input_height;
+export function setCanvasDimensions(input_width: number, input_height: number) {
+    width = input_width;
+    height = input_height;
 
-    console.log(canvas);
-    console.log("manual width:", canvas.width)
-    console.log("manual width:", canvas.height)
+    canvas.width = width;
+    canvas.height = height;
+}
+
+export function canvasFittedToBrowser() {
+    return ((canvas.width === window.innerWidth - 3) && (canvas.height === window.innerHeight - 3));
+}
+
+export function clearCanvas() {
+    context.reset();
+}
+
+export function canvasCenter() {
+    return makeVector(Math.round(canvas.width / 2), Math.round(canvas.height / 2));
+}
+
+export function getCanvasDimensions(): Vector {
+    return makeVector(width, height);
 }

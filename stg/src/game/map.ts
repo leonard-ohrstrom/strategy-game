@@ -1,5 +1,5 @@
-import { RenderManager } from "../rendering/draw";
-import { type Vector, type Rectangle, make_vector, getRandomInteger } from "../types/types.ts"
+import { RenderManager } from "../rendering/render.ts";
+import { type Vector, type Rectangle, makeVector, getRandomInteger } from "../types/types.ts"
 
 class Tile {
     private terrain: string;
@@ -14,12 +14,26 @@ class Tile {
     }
     getTexture(): string {
         const terrain = this.terrain;
-        if (terrain === "plains") {
-            this.texture = "./textures/hexagon_camo_pattern2.png";
-        } else if (terrain === "forest") {
-            this.texture = "./textures/hexagon_camo_pattern1.png"
-        } else {
-            this.texture = "./textures/hexagon.png"
+        switch(terrain) {
+            case "plain": {
+                this.texture = "./textures/hexagon_camo_pattern1.png";
+                break;
+            }
+            case "forest": {
+                this.texture = "./textures/hexagon_camo_pattern2.png";
+                break;
+            }
+            case "water": {
+                this.texture = "./textures/hexagon_camo_pattern3.png";
+                break;
+            }
+            case "mountain": {
+                this.texture = "./textures/hexagon_camo_pattern4.png";
+                break;
+            }
+            default: {
+                this.texture = "./textures/hexagon.png";
+            }
         }
         return this.texture;
     }
@@ -42,11 +56,15 @@ export class GameMap {
         for (let x = 0; x < width; x++) {
             GameMap.tile_grid[x] = [];
             for (let y = 0; y < height; y++) {
-                const randomNum = getRandomInteger(0, 1);
-                GameMap.tile_grid[x][y] = (randomNum === 0)
-                                        ? new Tile("plains")
-                                        : (randomNum === 1)
+                const randomNum = getRandomInteger(1, 10);
+                GameMap.tile_grid[x][y] = (randomNum <= 4)
+                                        ? new Tile("plain")
+                                        : (randomNum <= 8)
                                         ? new Tile("forest")
+                                        : (randomNum <= 9)
+                                        ? new Tile("water")
+                                        : (randomNum <= 10)
+                                        ? new Tile("mountain")
                                         : new Tile("empty");
             }
         }
@@ -79,7 +97,7 @@ export class GameMap {
         const image_dimensions: Rectangle = {
             width: 1000,
             height: 1115,
-            position: make_vector(0, 0)
+            position: makeVector(0, 0)
         };
 
         for (let x = 0; x < GameMap.horizontal_tiles; x++) {
@@ -92,7 +110,7 @@ export class GameMap {
                 let target_dimensions: Rectangle = {
                     width: target_width,
                     height: target_height,
-                    position: make_vector(
+                    position: makeVector(
                         x * target_width + x_offset,
                         y * target_height * 0.75 + y_offset
                     )
@@ -101,7 +119,7 @@ export class GameMap {
                 if (y % 2 === 1) {
                     // (for testing to differentiate odd and even tiles)
                     // tile.texture = "./textures/hexagon.png";
-                    target_dimensions.position = make_vector(
+                    target_dimensions.position = makeVector(
                         x * target_width + target_width * 0.5 + x_offset, 
                         y * target_height * 0.75 + y_offset
                     );
@@ -109,8 +127,7 @@ export class GameMap {
 
                 RenderManager.enqueueRender(tile.getTexture(), image_dimensions, target_dimensions);
 
-                if (tile.troops === 0) {
-                } else {
+                if (tile.troops === 0) {} else { /// to do: seperate function
                     const troop_texture: string = "./textures/division.png";
                     RenderManager.enqueueRender(troop_texture, image_dimensions, target_dimensions);
                     const number_texture = (tile.troops === 1)
@@ -122,18 +139,19 @@ export class GameMap {
                                          : (tile.troops === 4)
                                          ? "./textures/number4.png"
                                          : (tile.troops === 5)
-                                         ? "./textures/number2.png"
+                                         ? "./textures/number5.png"
                                          : (tile.troops === 6)
-                                         ? "./textures/number2.png"
+                                         ? "./textures/number6.png"
                                          : (tile.troops === 7)
-                                         ? "./textures/number2.png"
+                                         ? "./textures/number7.png"
                                          : (tile.troops === 8)
-                                         ? "./textures/number2.png"
+                                         ? "./textures/number8.png"
                                          : (tile.troops === 9)
-                                         ? "./textures/number2.png"
+                                         ? "./textures/number9.png"
                                          // (tile.troops > 9)
-                                         : "./textures/number2.png"
-                    RenderManager.enqueueRender(number_texture, image_dimensions, target_dimensions)}
+                                         : "./textures/number9plus.png"
+                    RenderManager.enqueueRender(number_texture, image_dimensions, target_dimensions)
+                }
 
                 if (tile.isSelected()) {
                     const selected_texture: string = "./textures/hexagon_selection_outline2.png";
@@ -141,6 +159,5 @@ export class GameMap {
                 }
             }
         }
-        RenderManager.RenderQueue();
     }
 }

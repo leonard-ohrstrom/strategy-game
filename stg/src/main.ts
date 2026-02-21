@@ -1,9 +1,13 @@
 // npm run dev
 
-import { fit_canvas_to_browser, set_canvas_dimensions } from "./rendering/canvas"
-
 console.log("GOLF ECHO ECHO KILO");
-fit_canvas_to_browser(); // no worky
-// set_canvas_dimensions(800, 450);
 
 import {} from "./rendering/render"
+import {} from "./inputs/inputs.ts"
+import {} from"./game/ticker.ts"
+import { GameMap } from "./game/map.ts";
+
+GameMap.constructGrid(8, 8);
+GameMap.addTroopToTile(0, 0);
+GameMap.addTroopToTile(2, 6);
+GameMap.selectTile(2, 6);
