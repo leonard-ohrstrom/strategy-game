@@ -6,7 +6,7 @@ export const context: CanvasRenderingContext2D = canvas.getContext('2d')!;
 let width: number = 0;
 let height: number = 0;
 
-export function fitCanvasToBrowser() {
+export function fitCanvasToBrowser(): void {
     width = window.innerWidth - 3;
     height = window.innerHeight - 3;
 
@@ -14,7 +14,7 @@ export function fitCanvasToBrowser() {
     canvas.height = height;
 }
 
-export function setCanvasDimensions(input_width: number, input_height: number) {
+export function setCanvasDimensions(input_width: number, input_height: number): void {
     width = input_width;
     height = input_height;
 
@@ -22,15 +22,15 @@ export function setCanvasDimensions(input_width: number, input_height: number) {
     canvas.height = height;
 }
 
-export function canvasFittedToBrowser() {
+export function isCanvasFittedToBrowser(): boolean {
     return ((canvas.width === window.innerWidth - 3) && (canvas.height === window.innerHeight - 3));
 }
 
-export function clearCanvas() {
+export function clearCanvas(): void {
     context.reset();
 }
 
-export function canvasCenter() {
+export function getCanvasCentre(): Vector {
     return makeVector(Math.round(canvas.width / 2), Math.round(canvas.height / 2));
 }
 

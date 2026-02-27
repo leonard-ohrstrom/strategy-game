@@ -1,31 +1,39 @@
-import { canvas, getCanvasDimensions } from "../rendering/canvas";
+import { getCanvasDimensions } from "../rendering/canvas";
 import { InputManager } from "./inputs";
 import { GameCamera } from "../game/camera";
 
+const square = (n: number): number => (n * n);
 export class ControlManager {
     static tickControls() {
-        const edge: number = getCanvasDimensions().x * 0.05;
+        const canvas_dimensions = getCanvasDimensions();
+        const edge_length: number = canvas_dimensions.x * 0.1;
 
-        const scroll_right: number = getCanvasDimensions().x - edge;
-        const scroll_left: number = edge;
-        const scroll_down: number = getCanvasDimensions().y - edge;
-        const scroll_up: number = edge;
+        const scroll_right: number = canvas_dimensions.x - edge_length;
+        const scroll_left: number = edge_length;
+        const scroll_down: number = canvas_dimensions.y - edge_length;
+        const scroll_up: number = edge_length;
 
-        console.log(getCanvasDimensions());
-        if(InputManager.MousePos().x > scroll_right) {
-            GameCamera.moveCamera(-25, 0);
-            console.log("right");
-        } else if (InputManager.MousePos().x < scroll_left) {
-            GameCamera.moveCamera(25, 0);
-            console.log("left");
+        const mouse_pos = InputManager.MousePos();
+        let edge_percent = 0;
+        // right
+        if(mouse_pos.x > scroll_right) {
+            edge_percent = 1 - (canvas_dimensions.x - mouse_pos.x) / edge_length;
+            GameCamera.moveCamera(-15 * square(edge_percent), 0);
+        // left
+        } else if (mouse_pos.x < scroll_left) {
+            edge_percent = 1 - mouse_pos.x / edge_length;
+            GameCamera.moveCamera(15 * square(edge_percent), 0);
+        } else {}
+        // up
+        if (mouse_pos.y > scroll_down) {
+            edge_percent = 1 - (canvas_dimensions.y - mouse_pos.y) / edge_length;
+            GameCamera.moveCamera(0, -15 * square(edge_percent));
+        // down
+        } else if (mouse_pos.y < scroll_up) {
+            edge_percent = 1 - mouse_pos.y / edge_length;
+            GameCamera.moveCamera(0, 15 * square(edge_percent));
         } else {}
 
-        if (InputManager.MousePos().y > scroll_down) {
-            GameCamera.moveCamera(0, -25);
-            console.log("down");
-        } else if (InputManager.MousePos().y < scroll_up) {
-            GameCamera.moveCamera(0, 25);
-            console.log("up");
-        } else {}
+        console.log(edge_percent);
     }
 }

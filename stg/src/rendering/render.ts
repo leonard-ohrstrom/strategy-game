@@ -43,24 +43,18 @@ export class RenderManager {
     static clearRenderQueue() {
         this.render_queue = [];
     }
-}
 
-// function drawIMG(img_path: string, source_dimensions: Rectangle,
-//                         target_dimensions: Rectangle): void {
-//     context.imageSmoothingEnabled = false;
-//     const image = new Image;
-//     image.src = img_path;
-//     image.onload = () => {
-//         context.drawImage(
-//             image,
-//             source_dimensions.position.x, // source image start x
-//             source_dimensions.position.y, // source image start y
-//             source_dimensions.width,      // source image width from start x
-//             source_dimensions.height,     // source image height from start y
-//             target_dimensions.position.x, // target start x on canvas
-//             target_dimensions.position.y, // target start y on canvas
-//             target_dimensions.width,      // target image width on canvas
-//             target_dimensions.height      // target image height on canvas
-//         );
-//     };
-// }
+    static drawCircle(x: number, y: number, radius: number = 10): void {
+        context.beginPath();
+        context.arc(x, y, radius, 0, 2 * Math.PI);
+        context.strokeStyle = "red";
+        context.stroke();
+    }
+
+    static drawLine(x1: number, y1: number, x2: number, y2: number): void {
+        context.beginPath();
+        context.moveTo(x1, y1);
+        context.lineTo(x2, y2);
+        context.stroke();
+    }
+}

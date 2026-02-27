@@ -1,5 +1,6 @@
 import { makeVector, type Vector } from "../types/types";
 import { GameCamera } from "../game/camera.ts";
+import { getCanvasCentre } from "../rendering/canvas.ts";
 
 export class InputManager {
     static {
@@ -18,13 +19,13 @@ export class InputManager {
         }
 
         onwheel = (event) => {
-            GameCamera.zoomCamera(event.deltaY / 5000);
+            GameCamera.scaleCamera(event.deltaY / 5000);
         }
     }
 
     private static keys_down: Array<string> = [];
 
-    private static mouse_pos: Vector = makeVector(0, 0);
+    private static mouse_pos: Vector = getCanvasCentre();
 
     static MousePos(): Vector {
         console.log(InputManager.mouse_pos);
