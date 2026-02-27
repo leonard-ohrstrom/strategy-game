@@ -11,19 +11,19 @@ export class GameCamera {
     private static scale = zoom_lower_limit;
 
     static moveCamera(x: number, y: number) {
-        GameCamera.x = GameCamera.x + x * GameCamera.scale;
-        GameCamera.y = GameCamera.y + y * GameCamera.scale;
+        GameCamera.x = GameCamera.x + x;
+        GameCamera.y = GameCamera.y + y;
     }
 
-    static zoomCamera(zoom: number) {
-        let new_zoom = GameCamera.scale + zoom;
-        if (new_zoom > zoom_lower_limit && new_zoom < zoom_upper_limit) {
-            GameCamera.scale = new_zoom;
+    static scaleCamera(scale: number) {
+        let new_scale = GameCamera.scale + scale;
+        if (new_scale > zoom_lower_limit && new_scale < zoom_upper_limit) {
+            GameCamera.scale = new_scale;
         }
         else {
-            if (zoom > 0) {
+            if (scale > 0) {
                 GameCamera.scale = zoom_upper_limit;
-            } else if (zoom < 0) {
+            } else if (scale < 0) {
                 GameCamera.scale = zoom_lower_limit;
             } else {}
         }
