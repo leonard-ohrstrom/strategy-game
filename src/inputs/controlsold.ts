@@ -1,6 +1,6 @@
-import { getCanvasDimensions } from "../rendering/canvas";
-import { InputManager } from "./inputs";
-import { GameCamera } from "../game/camera";
+import { getCanvasDimensions } from "../rendering/canvasold";
+import { InputManager } from "./inputsold";
+import { GameCamera } from "../game/cameraold";
 
 const square = (n: number): number => (n * n);
 export class ControlManager {

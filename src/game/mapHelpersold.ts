@@ -1,6 +1,6 @@
-import { RenderManager } from "../rendering/render";
-import { makeVector, type Rectangle } from "../types/types";
-import { GameCamera } from "./camera";
+import { RenderManager } from "../rendering/renderold";
+import { makeVector, type Rectangle } from "../types/typesold";
+import { GameCamera } from "./cameraold";
 
 const image_dimensions: Rectangle = {
         width: 1000,

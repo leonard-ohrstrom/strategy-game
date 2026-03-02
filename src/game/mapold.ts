@@ -1,7 +1,7 @@
-import { RenderManager } from "../rendering/render.ts";
-import { type Rectangle, makeVector, getRandomInteger } from "../types/types.ts"
-import { Tile } from "./tile.ts";
-import { renderTroops } from "./mapHelpers.ts";
+import { RenderManager } from "../rendering/renderold.ts";
+import { type Rectangle, makeVector, getRandomInteger } from "../types/typesold.ts"
+import { Tile } from "./tileold.ts";
+import { renderTroops } from "./mapHelpersold.ts";
 
 export class GameMap {
     private static tile_grid: Array<Array<Tile>> = [[]];

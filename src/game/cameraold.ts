@@ -1,4 +1,4 @@
-import { makeVector, type Vector } from "../types/types";
+import { makeVector, type Vector } from "../types/typesold";
 
 const zoom_upper_limit: number = 0.4;
 const zoom_lower_limit: number = 0.1;

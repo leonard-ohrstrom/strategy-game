@@ -1,4 +1,4 @@
-import { makeVector, type Vector } from "../types/types";
+import { makeVector, type Vector } from "../types/typesold";
 
 export const canvas: HTMLCanvasElement = document.querySelector('canvas')!;
 export const context: CanvasRenderingContext2D = canvas.getContext('2d')!;

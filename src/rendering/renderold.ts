@@ -1,5 +1,5 @@
-import { context } from "./canvas.ts";
-import { type Rectangle } from '../types/types.ts'
+import { context } from "./canvasold.ts";
+import { type Rectangle } from '../types/typesold.ts'
 
 export class RenderManager {
     private static render_queue: Array<[string, Rectangle, Rectangle]> = [];

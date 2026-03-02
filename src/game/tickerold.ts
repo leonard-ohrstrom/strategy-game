@@ -1,8 +1,8 @@
-import { RenderManager } from "../rendering/render";
-import { isCanvasFittedToBrowser, clearCanvas, fitCanvasToBrowser } from "../rendering/canvas";
-import { GameMap } from "./map";
-import { GameCamera } from "./camera";
-import { ControlManager } from "../inputs/controls";
+import { RenderManager } from "../rendering/renderold";
+import { isCanvasFittedToBrowser, clearCanvas, fitCanvasToBrowser } from "../rendering/canvasold";
+import { GameMap } from "./mapold";
+import { GameCamera } from "./cameraold";
+import { ControlManager } from "../inputs/controlsold";
 
 let old_time = 0;
 

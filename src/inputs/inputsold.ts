@@ -1,6 +1,6 @@
-import { makeVector, type Vector } from "../types/types";
-import { GameCamera } from "../game/camera.ts";
-import { getCanvasCentre } from "../rendering/canvas.ts";
+import { makeVector, type Vector } from "../types/typesold.ts";
+import { GameCamera } from "../game/cameraold.ts";
+import { getCanvasCentre } from "../rendering/canvasold.ts";
 
 export class InputManager {
     static {
