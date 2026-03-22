@@ -9,7 +9,11 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "typescript": "~5.9.3",
-    "vite": "^7.2.4"
+    "typescript": "~5.9.3"
+  },
+  "dependencies": {
+    "@types/ini": "^4.1.1",
+    "ini": "^6.0.0",
+    "vite": "^7.3.1"
   }
 }
