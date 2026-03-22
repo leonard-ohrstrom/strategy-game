@@ -19,16 +19,19 @@ export class RenderLogicManager {
     static update() {
         RenderManager.clear();
         this.enqueueTiles();
-        this.renderQueue();
+        this.renderQueuedRenders();
         this.resetRenderQueue();
     }
-    private static renderQueue(): void {
+    private static renderQueuedRenders(): void {
         this.render_queue.forEach(render_layer => {
             render_layer.forEach(render_order => RenderManager.render(
                 render_order.texture,
                 render_order.target
             ))
         });
+    }
+    private static pushToQueue(order: RenderOrder, layer: number): void {
+        this.render_queue[layer].push(order);
     }
     private static enqueueTiles(): void {
         const tile_dimensions: Rectangle = TextureManager.getDimensions("tile");
@@ -42,26 +45,26 @@ export class RenderLogicManager {
             for (let y = 0; y < height; y++) {
                 const tile_texture = TileMapManager.readTile(x, y).terrain;
                 let target_dimensions: Rectangle;
-                const base_x = tile_size.x * x;
-                const base_y = tile_size.y * y;
-                if (y % 2 === 0) {
-                    target_dimensions = makeRectangle(base_x,
-                                                      base_y * 0.75,
-                                                      base_x + tile_size.x,
-                                                      base_y * 0.75 + tile_size.y);
+                const start_x = tile_size.x * x;
+                const start_y = tile_size.y * y;
+                const even_layer = y % 2 === 0;
+                if (even_layer) {
+                    target_dimensions = makeRectangle(start_x,
+                                                      start_y * 0.75,
+                                                      start_x + tile_size.x,
+                                                      start_y * 0.75 + tile_size.y);
                 } else {
-                    target_dimensions = makeRectangle(base_x + 0.5 * tile_size.x,
-                                                      base_y * 0.75,
-                                                      base_x + 1.5 * tile_size.x,
-                                                      base_y * 0.75 + tile_size.y);
+                    target_dimensions = makeRectangle(start_x + 0.5 * tile_size.x,
+                                                      start_y * 0.75,
+                                                      start_x + 1.5 * tile_size.x,
+                                                      start_y * 0.75 + tile_size.y);
                 }
+                // adjust for camera position
                 target_dimensions = translateRectangle(target_dimensions, -camera.x, -camera.y);
+                // adjust for camera zoom
                 target_dimensions = scaleByFocalPoint(target_dimensions, centre, zoom);
-                const tile_render: RenderOrder = {
-                    texture: tile_texture,
-                    target: target_dimensions
-                }
-                this.render_queue[0].push(tile_render);
+                const tile_render: RenderOrder = {texture: tile_texture, target: target_dimensions}
+                this.pushToQueue(tile_render, 0);
             }
         }
     }

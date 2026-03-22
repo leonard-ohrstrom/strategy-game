@@ -19,18 +19,16 @@ export class GameCamera {
 
 class zoomManager {
     private static zoom_level: number = 1;
-    private static min_zoom_level: number = -1;
+    private static min_zoom_level: number = 1;
     private static max_zoom_level: number = 4;
     private static zoomBound(n: number): number {
         return Math.min(Math.max(this.min_zoom_level, n), this.max_zoom_level);
     }
     static getZoom(): number {
         switch(this.zoom_level) {
-            case -1: return 0.01;
-            case 0: return 0.03;
-            case 1: return 0.1;
-            case 2: return 0.2;
-            case 3: return 0.4;
+            case 1: return 0.125;
+            case 2: return 0.25;
+            case 3: return 0.5;
             case 4: return 1;
             default: console.error("zoomManager get_zoom missing case"); return 0;
         }
