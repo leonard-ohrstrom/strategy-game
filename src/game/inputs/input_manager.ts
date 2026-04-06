@@ -5,7 +5,7 @@
  */
 import type { Vector } from "../../types/types";
 import { makeVector } from "../../types/type_constructors";
-import { GameCamera } from "./game_camera";
+import { GameCamera } from "../../render/game_camera";
 
 export class InputManager {
     private static active_keys: Set<string> = new Set();

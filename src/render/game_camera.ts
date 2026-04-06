@@ -2,8 +2,8 @@
  * Game camera for navigating map, keeps track of it's own position (x, y) as
  * well as how zoomed in it is.
  */
-import type { Vector } from "../../types/types";
-import { makeVector } from "../../types/type_constructors";
+import type { Vector } from "../types/types";
+import { makeVector } from "../types/type_constructors";
 
 export class GameCamera {
     private static pos: Vector = makeVector(0, 0);
@@ -18,18 +18,16 @@ export class GameCamera {
 }
 
 class zoomManager {
-    private static zoom_level: number = 1;
     private static min_zoom_level: number = 1;
-    private static max_zoom_level: number = 4;
+    private static max_zoom_level: number = 2;
+    private static zoom_level: number = this.min_zoom_level;
     private static zoomBound(n: number): number {
         return Math.min(Math.max(this.min_zoom_level, n), this.max_zoom_level);
     }
     static getZoom(): number {
         switch(this.zoom_level) {
-            case 1: return 0.125;
-            case 2: return 0.25;
-            case 3: return 0.5;
-            case 4: return 1;
+            case 1: return 0.5;
+            case 2: return 1;
             default: console.error("zoomManager get_zoom missing case"); return 0;
         }
     }
