@@ -1,0 +1,16 @@
+# Clean up 'render_logic_manager.ts' logic and syntax
+  - Render map tiles by using tile as parameter, also xy if tile does not know its own position
+  - Render units by using unit as parameter
+# Change tile map to be instance of a class? ie not static
+  - Instead of having one static tile map, require the tile map to be initialised
+# Implement land unit class, every land unit is an instance of this class, which knows precisely
+  what kind of unit it is, its own position, movement direction, and more
+  - Knows what kind of unit it is (eg infantry, armoured, mechanised, etc)
+  - Knows its own position
+  - Knows where its going (if anywhere)
+    * Knows to what percent it has completed its movement
+    * Knows if its in a battle, and what kind (defending or attacking)
+# Implement battles
+# Implement data structure for saving map tile layout
+# Implement functionality for calculating where mouse is on game screen (taking into account camera
+  zoom and offset)

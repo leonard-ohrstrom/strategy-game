@@ -6,6 +6,7 @@ import { RenderLogicManager } from "../../../render/render_logic_manager";
 import { GameMapManager } from "./game_map_manager";
 import { InputManager } from "../../inputs/input_manager";
 import { setCanvasToBrowser } from "../../../render/canvas_context";
+import { mousePositionManager } from "../../inputs/mouse_position";
 
 export class GameStateManager {
     static update(delta_time: number) {
@@ -14,5 +15,6 @@ export class GameStateManager {
         InputManager.updateMouseAction();
         GameMapManager.update(delta_time);
         RenderLogicManager.update();
+        mousePositionManager.update();
     }
 }

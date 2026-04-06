@@ -1,8 +1,7 @@
 /**
  * Constructors for types used in the code.
  */
-import { getRandomTerrain } from "./random";
-import type { Vector, Rectangle, Tile } from "../types/types";
+import { type Vector, type Rectangle } from "./types";
 type num = number;
 export function makeVector(a : num, b: num): Vector { return{x : a, y : b} }
 export function makeRectangle(x0 : num, y0: num, x1: num, y1: num) : Rectangle {
@@ -22,4 +21,3 @@ export function scaleRectangle(rectangle: Rectangle, factor_x: number, factor_y:
     const y1: number = y0 + rectangle.height;
     return makeRectangle(x0, y0, x1 * factor_x, y1 * factor_y);
 }
-export function makeTile(): Tile { return{terrain: getRandomTerrain()} }
