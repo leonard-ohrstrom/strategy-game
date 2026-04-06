@@ -10,6 +10,7 @@
   - Knows where its going (if anywhere)
     * Knows to what percent it has completed its movement
     * Knows if its in a battle, and what kind (defending or attacking)
+# Implement wars
 # Implement battles
 # Implement data structure for saving map tile layout
 # Implement functionality for calculating where mouse is on game screen (taking into account camera

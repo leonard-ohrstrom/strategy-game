@@ -17,13 +17,9 @@ export class RenderManager {
             .then(response => response.json())
             .then(data => data);
         textures.forEach((texture: string) => {
-            try {
-                const image = new Image;
-                image.src = TextureManager.getPath(texture);
-                this.pre_loaded_images.set(texture, image);
-            } catch (error) {
-                console.error("errorrrrr hihihihi")
-            }
+            const image = new Image;
+            image.src = TextureManager.getPath(texture);
+            this.pre_loaded_images.set(texture, image);
         });
     }
     private static drawImage(image: HTMLImageElement, source: Rectangle, target: Rectangle) {
