@@ -15,3 +15,5 @@
 # Implement data structure for saving map tile layout
 # Implement functionality for calculating where mouse is on game screen (taking into account camera
   zoom and offset)
+# Add aircrafts
+# Add ships

@@ -1,7 +1,9 @@
 /**
  * Stores data and allows reading of all tiles on the map.
  */
+import { readJSON } from "../../types/file_parser";
 import { getRandomInteger } from "../../types/general_functions";
+import type { Vector } from "../../types/types";
 import { CountryManager } from "./country_manager";
 
 export class Tile {
@@ -11,6 +13,7 @@ export class Tile {
         this.controller = null;
         this.troops = 0;
     }
+
     private terrain: string;
     private owner: string | null;
     private controller: string | null;
@@ -38,6 +41,7 @@ export class TileMapManager {
     private static tile_grid: Array<Array<Tile>>;
     private static width: number;
     private static height: number;
+
     static makeGrid(width: number, height: number): void {
         this.tile_grid = [[]];
         this.width = width;
@@ -49,8 +53,18 @@ export class TileMapManager {
             }
         }
     }
+
+    static async loadMapFile(): Promise<void> {
+        const texture_grid: Array<Array<string>> = await readJSON("src/map/output/map.json");
+        this.tile_grid = texture_grid.map(row => row.map(texture => new Tile(texture)));
+        this.width = this.tile_grid.length;
+        this.height = this.tile_grid[0].length;
+    }
+
     static readWidth(): number { return this.width }
+
     static readHeight(): number { return this.height }
+
     static readTile(x: number, y: number): Tile {
         try { return this.tile_grid[x][y] }
         catch (error) {
@@ -58,18 +72,28 @@ export class TileMapManager {
             return new Tile('');
         }
     }
+
     static setTerrain(x: number, y: number, terrain: string): void {
         this.tile_grid[x][y].setTerrain(terrain);
     }
+
     static setTroops(x: number, y: number, amount: number): void {
         this.tile_grid[x][y].setTroops(amount);
     }
+
     static setOwner(x: number, y: number, tag: string): void {
         this.tile_grid[x][y].setOwner(tag);
         this.setController(x, y, tag);
     }
+
     static setController(x: number, y: number, tag: string): void {
         this.tile_grid[x][y].setController(tag);
+    }
+
+    static positionExists(position: Vector): boolean {
+        const x = position.x;
+        const y = position.y;
+        return (x >= 0 && y >= 0 && x < this.width && y < this.height);
     }
 }
 /**

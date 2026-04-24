@@ -10,3 +10,10 @@ export async function loadConfig(path: string): Promise<any> {
     const config = ini.parse(text);
     return config;
 }
+
+export async function readJSON(relative_path: string): Promise<any> {
+    const json_content: any = await fetch(relative_path)
+    .then(response => response.json())
+    .then(data => data);
+    return json_content;
+}

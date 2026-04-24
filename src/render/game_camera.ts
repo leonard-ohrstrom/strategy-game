@@ -9,7 +9,7 @@ export class GameCamera {
     private static pos: Vector = makeVector(0, 0);
     static getPos(): Vector { return this.pos }
     static incrementPos(x: number, y: number): void {
-        this.pos = { x: this.pos.x + x, y: this.pos.y + y }
+        this.pos = makeVector(this.pos.x + x, this.pos.y + y)
     }
     static getZoom(): number { return zoomManager.getZoom() }
     static setPos(pos: Vector) { this.pos = pos }
@@ -18,19 +18,29 @@ export class GameCamera {
 }
 
 class zoomManager {
-    private static min_zoom_level: number = 1;
-    private static max_zoom_level: number = 2;
-    private static zoom_level: number = this.min_zoom_level;
+    private static min_zoom_level: number = -6;
+    private static max_zoom_level: number = 1;
+    private static zoom_level: number = 1;
+
     private static zoomBound(n: number): number {
         return Math.min(Math.max(this.min_zoom_level, n), this.max_zoom_level);
     }
+
     static getZoom(): number {
         switch(this.zoom_level) {
-            case 1: return 0.5;
-            case 2: return 1;
+            case -6: return 1/128;
+            case -5: return 1/64;
+            case -4: return 1/32;
+            case -3: return 1/16;
+            case -2: return 1/8;
+            case -1: return 1/4;
+            case 0: return 1/2;
+            case 1: return 1;
             default: console.error("zoomManager get_zoom missing case"); return 0;
         }
     }
+
     public static zoomIn(): void { this.zoom_level = this.zoomBound(this.zoom_level + 1) }
     public static zoomOut(): void { this.zoom_level = this.zoomBound(this.zoom_level - 1) }
+    public static setZoom(zoom: number): void {this.zoom_level = zoom}
 }

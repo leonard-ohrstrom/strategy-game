@@ -3,6 +3,8 @@
  * (npm run dev)
  */
 import { boot } from "../game/init/boot"
-import { test } from "../game/init/test"
+import { codeTest } from "../game/init/code_test";
+import { gameTest } from "../game/init/game_test";
+codeTest();
 await boot();
-test();
+gameTest();
