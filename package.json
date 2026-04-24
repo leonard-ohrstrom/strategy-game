@@ -9,11 +9,15 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/node": "^25.6.0",
     "typescript": "~5.9.3"
   },
   "dependencies": {
     "@types/ini": "^4.1.1",
+    "atomically": "^2.1.1",
     "ini": "^6.0.0",
+    "node": "^24.15.0",
+    "tsx": "^4.21.0",
     "vite": "^7.3.1"
   }
 }

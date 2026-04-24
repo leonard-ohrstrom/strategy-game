@@ -1,11 +1,14 @@
 /**
  * Manages instructions of what to draw forwards to context.
  */
-import type { Rectangle } from "../types/types";
+import type { Rectangle, Vector } from "../types/types";
 import { TextureManager } from "./texture_manager";
-import { clearCanvas, context } from "./canvas_context";
+import { clearCanvas, context, getCanvasDimensions } from "./canvas_context";
+import { makeRectangle } from "../types/type_constructors";
 
 const image_smoothing_quality: ImageSmoothingQuality = 'medium';
+
+let temp_first = true
 
 export class RenderManager {
     private static color_canvas: HTMLCanvasElement = document.createElement('canvas');
@@ -13,7 +16,7 @@ export class RenderManager {
 
     static pre_loaded_images: Map<string, HTMLImageElement> = new Map;
     static async init(): Promise<void> {
-        const textures: Array<string> = await fetch('textures.json')
+        const textures: Array<string> = await fetch('./data/textures/textures.json')
             .then(response => response.json())
             .then(data => data);
         textures.forEach((texture: string) => {
@@ -50,7 +53,7 @@ export class RenderManager {
             target.width,      // target image width on canvas
             target.height      // target image height on canvas
         );
-        this.color_context.globalCompositeOperation = "source-in";
+        this.color_context.globalCompositeOperation = 'source-in';
         this.color_context.fillStyle = color;
         this.color_context.fillRect(0, 0, target.width, target.height);
         context.drawImage(
@@ -62,20 +65,33 @@ export class RenderManager {
         )
     }
 
+    static renderDot(target_vector: Vector, color: string): void {
+        context.beginPath();
+        context.arc(target_vector.x, target_vector.y, 5, 0, 360);
+        context.fillStyle = color;
+        context.fill();
+    }
+
     static clear(): void { clearCanvas(); }
 
     static render(texture: string, target_dimensions: Rectangle, color: string | null = null): void {
         context.imageSmoothingQuality = image_smoothing_quality;
         let image: HTMLImageElement = new Image;
+
         if(this.pre_loaded_images.has(texture)) {
-            try { image = this.pre_loaded_images.get(texture)! }
-            catch(error) { console.error("RenderManager pre-render rendering error:", error) }
+            try {
+                image = this.pre_loaded_images.get(texture)!
+            } catch(error) {
+                console.error("RenderManager pre-render rendering error")
+            }
         } else {
             console.error("loading non pre-rendered image", texture);
             image.src = TextureManager.getPath(texture);
             image.onload = () => { }
         }
+
         const texture_dimensions: Rectangle = TextureManager.getDimensions(texture);
+
         if (color) {
             this.drawImageColor(image, texture_dimensions, target_dimensions, color);
         } else {

@@ -7,16 +7,25 @@ import { TileMapManager } from "../state/tile_map";
 import { startTicker } from "../state/tick/ticker";
 import { RenderManager } from "../../render/render_manager";
 import { CountryManager } from "../state/country_manager";
+import { DivisionManager } from "../state/division_manager";
 
-function buildMap(): void {
-    TileMapManager.makeGrid(8, 8);
+async function buildMap(): Promise<void> {
+    await TileMapManager.loadMapFile();
 }
 
 export async function boot(): Promise<void> {
+    console.log("initialising textures")
     await TextureManager.init();
+    console.log("initialising inputs")
     await InputEventManager.init();
+    console.log("initialising renders")
     await RenderManager.init();
+    console.log("initialising countries")
     await CountryManager.init();
-    buildMap();
+    console.log("initialising division manager")
+    await DivisionManager.init();
+    console.log("building map")
+    await buildMap();
+    console.log("starting ticker")
     startTicker();
 }
