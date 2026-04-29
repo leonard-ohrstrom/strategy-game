@@ -3,18 +3,16 @@
  */
 import type { Rectangle, Vector } from "../types/types";
 import { TextureManager } from "./texture_manager";
-import { clearCanvas, context, getCanvasDimensions } from "./canvas_context";
-import { makeRectangle } from "../types/type_constructors";
+import { clearCanvas, context } from "./canvas_context";
 
 const image_smoothing_quality: ImageSmoothingQuality = 'medium';
-
-let temp_first = true
 
 export class RenderManager {
     private static color_canvas: HTMLCanvasElement = document.createElement('canvas');
     private static color_context: CanvasRenderingContext2D = this.color_canvas.getContext('2d')!;
 
     static pre_loaded_images: Map<string, HTMLImageElement> = new Map;
+
     static async init(): Promise<void> {
         const textures: Array<string> = await fetch('./data/textures/textures.json')
             .then(response => response.json())
@@ -25,6 +23,7 @@ export class RenderManager {
             this.pre_loaded_images.set(texture, image);
         });
     }
+
     private static drawImage(image: HTMLImageElement, source: Rectangle, target: Rectangle) {
         context.drawImage(
             image,
@@ -38,10 +37,10 @@ export class RenderManager {
             target.height      // target image height on canvas
         );
     }
+
     public static drawImageColor(image: HTMLImageElement, source: Rectangle, target: Rectangle, color: string) {
         this.color_canvas.width = target.width;
         this.color_canvas.height = target.height;
-        this.color_context.imageSmoothingEnabled = context.imageSmoothingEnabled;
         this.color_context.drawImage(
             image,
             source.position.x, // source image start x
@@ -72,7 +71,9 @@ export class RenderManager {
         context.fill();
     }
 
-    static clear(): void { clearCanvas(); }
+    static clear(): void {
+        clearCanvas();
+    }
 
     static render(texture: string, target_dimensions: Rectangle, color: string | null = null): void {
         context.imageSmoothingQuality = image_smoothing_quality;
@@ -80,7 +81,7 @@ export class RenderManager {
 
         if(this.pre_loaded_images.has(texture)) {
             try {
-                image = this.pre_loaded_images.get(texture)!
+                image = this.pre_loaded_images.get(texture)!;
             } catch(error) {
                 console.error("RenderManager pre-render rendering error")
             }

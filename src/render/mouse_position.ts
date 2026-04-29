@@ -12,4 +12,8 @@ export class mousePositionManager {
     static update(): void {
         this.raw_mouse_pos = InputManager.getMousePos();
     }
+
+    static mousePos(): Vector {
+        return this.raw_mouse_pos;
+    }
 }
