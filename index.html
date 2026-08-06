@@ -6,24 +6,15 @@
   <title>stg</title>
   <style type="text/css">
     html, body {
-      height: 100%;
       margin: 0;
+      padding: 0;
+      border: 0px;
+      overflow:hidden;
+    }
+
+    #god_menu {
       font-family:monospace;
       font-size:large;
-    }
-    canvas {
-      border: 1px solid red;
-      background-color: gray;
-      display: block;
-      z-index: 0;
-    }
-    body {
-      display: flex;
-      justify-content: center;  /* horizontal center */
-      align-items: center;      /* vertical center */
-      background-color: rgb(50, 50, 50);
-    }
-    #god_menu {
       height: 400px;
       width: 200px;
       position: absolute;
@@ -38,7 +29,6 @@
   </style>
 </head>
 <body>
-  <canvas></canvas>
   <div id="god_menu">God Menu <br>
     tile
     <input type="number" id="god_tile_x" placeholder="x" style="width: 30px">

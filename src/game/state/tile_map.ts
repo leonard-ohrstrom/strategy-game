@@ -42,13 +42,19 @@ export class TileMapManager {
     private static width: number;
     private static height: number;
 
-    static makeGrid(width: number, height: number): void {
+    static makeGrid(width: number, height: number, terrain: string | undefined = undefined): void {
         this.tile_grid = [[]];
         this.width = width;
         this.height = height;
         for (let x = 0; x < width; x++) {
             this.tile_grid[x] = [];
             for (let y = 0; y < height; y++) {
+                let tile_terrain: string | undefined = terrain;
+
+                if (!tile_terrain) {
+                    tile_terrain = getRandomTerrain();
+                }
+
                 this.tile_grid[x][y] = new Tile(getRandomTerrain());
             }
         }
@@ -108,7 +114,7 @@ function getRandomTerrain(): string {
         case 2:
             return "forest";
         default:
-            console.error("random.ts line 17: GETRANDOMTERRAIN RANDOM INTEGER OUT OF RANGE");
+            console.error("GETRANDOMTERRAIN RANDOM INTEGER OUT OF RANGE");
     }
     return "";
 }

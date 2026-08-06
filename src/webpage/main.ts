@@ -2,9 +2,15 @@
  * Initial code
  * (npm run dev)
  */
-import { boot } from "../game/init/boot"
+
 import { codeTest } from "../game/init/code_test";
+import { boot } from "../game/init/boot";
 import { gameTest } from "../game/init/game_test";
-codeTest();
-await boot();
-gameTest();
+
+const game_testing: boolean = false;
+if (game_testing) {
+    gameTest();
+} else {
+    codeTest();
+    await boot();
+}

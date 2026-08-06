@@ -1,5 +1,69 @@
-[
-"tile_l1", "plain_l1", "forest_l1", "water_l1", "hexagon_outline_l1", "hexagon_outline_striped_l1", "troop_l1",
-"tile_l2", "plain_l2", "forest_l2", "water_l2", "hexagon_outline_l2", "hexagon_outline_striped_l2", "troop_l2",
-"tile_l3", "water_l3"
-]
+{
+    "sprite_sheets": {
+        "labels": ["tiles"],
+        "sheets": {
+            "tiles": {
+                "path": "./textures/tiles.png",
+                "sprite_labels": ["blank", "plain", "forest", "water", "outline", "striped_outline", "troop"],
+                "sprites": {
+                    "blank": {
+                        "boundaries": {
+                            "x0": 0,
+                            "y0": 0,
+                            "x1": 250,
+                            "y1": 279
+                        }
+                    },
+                    "plain": {
+                        "boundaries": {
+                            "x0": 251,
+                            "y0": 0,
+                            "x1": 501,
+                            "y1": 279
+                        }
+                    },
+                    "forest": {
+                        "boundaries": {
+                            "x0": 502,
+                            "y0": 0,
+                            "x1": 752,
+                            "y1": 279
+                        }
+                    },
+                    "water": {
+                        "boundaries": {
+                            "x0": 753,
+                            "y0": 0,
+                            "x1": 1003,
+                            "y1": 279
+                        }
+                    },
+                    "outline": {
+                        "boundaries": {
+                            "x0": 0,
+                            "y0": 280,
+                            "x1": 250,
+                            "y1": 559
+                        }
+                    },
+                    "striped_outline": {
+                        "boundaries": {
+                            "x0": 251,
+                            "y0": 280,
+                            "x1": 501,
+                            "y1": 559
+                        }
+                    },
+                    "troop": {
+                        "boundaries": {
+                            "x0": 502,
+                            "y0": 280,
+                            "x1": 752,
+                            "y1": 559
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

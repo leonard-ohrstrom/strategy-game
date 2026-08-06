@@ -2,19 +2,17 @@
  * Sends update to all aspects of game that need constant updating every frame.
  */
 
-import { RenderLogicManager } from "../../../render/render_logic_manager";
+import { RenderManager } from "../../../render/render_manager";
 import { GameMapManager } from "./game_map_manager";
 import { InputManager } from "../../inputs/input_manager";
-import { setCanvasToBrowser } from "../../../render/canvas_context";
 import { mousePositionManager } from "../../../render/mouse_position";
 
 export class GameStateManager {
-    static update(delta_time: number) {
-        setCanvasToBrowser();
+    static async update(delta_time: number) {
         InputManager.updateKeyAction(delta_time);
         InputManager.updateMouseAction();
         GameMapManager.update(delta_time);
-        RenderLogicManager.update();
+        await RenderManager.update();
         mousePositionManager.update();
     }
 }

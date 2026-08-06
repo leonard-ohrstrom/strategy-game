@@ -1,5 +1,5 @@
 /**
- * Tests to ensure code exhibits expected behaviour on a more technical level.
+ * Tests to ensure code exhibits expected behaviour internally.
  */
 
 import { makeVector } from "../../types/type_constructors";

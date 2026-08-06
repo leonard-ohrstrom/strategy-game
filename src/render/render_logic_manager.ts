@@ -2,63 +2,61 @@
  * Fetches information from other aspects of game to interpret and send to
  * RenderManager as medium level abstraction instructions of what to draw.
  */
-import { RenderManager } from "./render_manager";
 import { TextureManager } from "./texture_manager";
 import { Tile, TileMapManager } from "../game/state/tile_map";
 import { makeRectangle, makeVector, scaleRectangle, translateRectangle } from "../types/type_constructors";
 import type { Rectangle, Vector } from "../types/types";
 import { GameCamera } from "./game_camera";
-import { getCanvasCentre, getCanvasDimensions } from "./canvas_context";
 import { CountryManager } from "../game/state/country_manager";
 
-type RenderOrder = { texture: string, target: Rectangle, color: string | null }
-type RenderQueue = Array<Array<RenderOrder>>
+export type RenderOrder = { texture: string, target: Rectangle, layer: number, color: string | null }
+export type RenderQueue = Array<RenderOrder>
+
+function getScreenCentre(): Vector {
+    const screen_dimensions: Vector = getScreenDimensions();
+    const x_centre: number = Math.round(screen_dimensions.x / 2);
+    const y_centre: number = Math.round(screen_dimensions.y / 2);
+    return makeVector(x_centre, y_centre);
+}
+
+function getScreenDimensions(): Vector {
+    return makeVector(window.innerWidth, window.innerHeight);
+}
+
 
 export class RenderLogicManager {
     private static render_queue: RenderQueue = new Array;
-    private static resetRenderQueue(): void { this.render_queue = new Array }
 
-    static update(): void {
-        RenderManager.clear();
+    /**
+     * Clears the render queue.
+     */
+    public static clearRenderQueue(): void {
+        this.render_queue = new Array
+    }
+
+    /**
+     * Returns the render queue WARNING: Returns array POINTER, do NOT write to!
+     * */
+    public static getRenderQueue(): RenderQueue {
         this.enqueueRenders();
         this.zoomAndOffsetQueuedRenders();
-        this.renderQueuedRenders();
-        this.resetRenderQueue();
+        return this.render_queue;
     }
 
     private static enqueueRenders(): void {
         this.enqueueTiles();
     }
 
-    private static renderQueuedRenders(): void {
-        this.render_queue.forEach(render_layer =>
-            render_layer.forEach(render_order =>
-                RenderManager.render(
-                    render_order.texture,
-                    render_order.target,
-                    render_order.color
-                )
-            )
-        )
-    }
-
     private static zoomAndOffsetQueuedRenders(): void {
-        this.render_queue.forEach(render_layer =>
-            render_layer.forEach(render_order => {
-                render_order = zoomAndOffsetRender(render_order)
-            })
-        )
+        this.render_queue = this.render_queue.map(zoomAndOffsetRender);
     }
 
-    private static pushToQueue(render_order: RenderOrder, layer: number): void {
-        if (this.render_queue[layer] === undefined) {
-            this.render_queue[layer] = new Array;
-        }
-        this.render_queue[layer].push(render_order);
+    private static pushToQueue(render_order: RenderOrder): void {
+        this.render_queue.push(render_order);
     }
 
     /**
-     * enqueues render order for tiles (terrain)
+     * enqueues render order for tiles, including troop placements, occupation etc.
      */
     private static enqueueTiles(): void {
         const margin: number = 2;
@@ -83,19 +81,23 @@ export class RenderLogicManager {
         for (let x = start_x; x < end_x; x++) {
             for (let y = start_y; y < end_y; y++) {
                 const tile: Tile = TileMapManager.readTile(x, y);
+
                 // render terrain
-                this.pushToQueue(this.getTerrainRender(x, y), 0);
+                this.pushToQueue(this.getTerrainRender(x, y));
+
                 // render owner
                 if (tile.getOwner() !== null) {
-                    this.pushToQueue(this.getOwnerRender(x, y), 1);
-                }
-                // render occupation
-                if (tile.isOccupied()) {
-                    this.pushToQueue(this.getOccupationRender(x, y), 2);
+                    this.pushToQueue(this.getOwnerRender(x, y));
                 }
 
+                // render occupation
+                if (tile.isOccupied()) {
+                    this.pushToQueue(this.getOccupationRender(x, y));
+                }
+
+                // render soldiers
                 if (tile.getTroops() > 0) {
-                    this.pushToQueue(this.getTroopRender(x, y), 3 + y);
+                    this.pushToQueue(this.getTroopRender(x, y));
                 }
             }
         }
@@ -103,9 +105,9 @@ export class RenderLogicManager {
 
     private static getTerrainRender(x: number, y: number): RenderOrder {
         const tile: Tile = TileMapManager.readTile(x, y);
-        const terrain_texture: string = this.setLOD(tile.getTerrain());
+        const terrain_texture: string = tile.getTerrain();
         const pos: Vector = makeVector(x, y);
-        const terrain_render: RenderOrder = this.renderOnTileGrid(terrain_texture, pos);
+        const terrain_render: RenderOrder = this.renderOnTileGrid(terrain_texture, pos, 4 * y);
         return terrain_render;
     }
 
@@ -121,7 +123,7 @@ export class RenderLogicManager {
         }
         const pos: Vector = makeVector(x, y);
         const offset: Vector = makeVector(0, 0);
-        const owner_render: RenderOrder = this.renderOnTileGrid(this.setLOD('hexagon_outline'), pos, offset, owner_colour);
+        const owner_render: RenderOrder = this.renderOnTileGrid("outline", pos, 4 * y + 1, offset, owner_colour);
         return owner_render;
     }
 
@@ -137,13 +139,13 @@ export class RenderLogicManager {
         }
         const pos: Vector = makeVector(x, y);
         const offset: Vector = makeVector(0, 0);
-        const controller_render: RenderOrder = this.renderOnTileGrid(this.setLOD('hexagon_outline_striped'), pos, offset, controller_colour);
+        const controller_render: RenderOrder = this.renderOnTileGrid("striped_outline", pos, 4 * y + 2, offset, controller_colour);
         return controller_render;
     }
 
     private static getTroopRender(x: number, y: number): RenderOrder {
         const pos: Vector = makeVector(x, y);
-        const troop_render: RenderOrder = this.renderOnTileGrid('troop_l1', pos);
+        const troop_render: RenderOrder = this.renderOnTileGrid('troop', pos, 4 * y + 3);
         return troop_render;
     }
 
@@ -154,11 +156,11 @@ export class RenderLogicManager {
      * @param offset optional Vector representing how much to offset the render in (x, y)
      * @returns RenderOrder representing the texture as a tile on a map grid
      */
-    private static renderOnTileGrid(texture: string, position: Vector, offset = makeVector(0, 0),
+    private static renderOnTileGrid(texture: string, position: Vector, layer: number, offset = makeVector(0, 0),
                                     color: string | null = null) {
-        const tile_dimension: Rectangle = TextureManager.getDimensions("tile_l1");
+        const tile_dimension: Rectangle = TextureManager.getSpriteDimensions("blank");
         const tile_size: Vector = makeVector(tile_dimension.width, tile_dimension.height);
-        return this.renderOnGrid(tile_size, position, texture, offset, color);
+        return this.renderOnGrid(tile_size, position, texture, offset, layer, color);
     }
 
     /**
@@ -169,14 +171,14 @@ export class RenderLogicManager {
      * @param offset optional Vector representing how much to offset the render in (x, y)
      * @returns RenderOrder representing the texture as a tile in the given grid
      */
-    private static renderOnGrid(tile_dimension: Vector, position: Vector, texture: string,
-                                offset = makeVector(0, 0), color: string | null = null): RenderOrder {
+    private static renderOnGrid(tile_dimension: Vector, position: Vector, texture: string, offset = makeVector(0, 0),
+                                layer: number, color: string | null = null): RenderOrder {
         const grid_pos_x = position.x;
         const grid_pos_y = position.y;
         const start_x = tile_dimension.x * grid_pos_x + offset.x;
         const start_y = tile_dimension.y * grid_pos_y + offset.y;
 
-        const texture_dimensions: Rectangle = TextureManager.getDimensions(texture);
+        const texture_dimensions: Rectangle = TextureManager.getSpriteDimensions(texture);
         const texture_width: number = texture_dimensions.width;
         const texture_height: number = texture_dimensions.height;
         const texture_height_to_width: number = texture_height / texture_width;
@@ -200,6 +202,7 @@ export class RenderLogicManager {
         const tile_render: RenderOrder = {
             texture: texture,
             target: target_dimensions,
+            layer: layer,
             color: color
         }
 
@@ -214,11 +217,13 @@ export class RenderLogicManager {
      */
     static tileOnMouse(mouse_pos: Vector): Vector {
         const relative_mouse_pos: Vector = antiZoomAndOffsetVector(mouse_pos);
+        console.warn("tileOnMouse not yet implemneted");
         return makeVector(0, 0)
     }
 
     // calculates what tile is on a given pixel without accounting for camera
     private static tileOnPixel(pixel: Vector): Vector {
+        console.warn("tileonPixel not yet implemneted");
         return makeVector(0, 0)
     }
 
@@ -228,7 +233,7 @@ export class RenderLogicManager {
      * @returns Vector representing the position of the most upper left corner tile visible
      */
     private static getStartCornerTile(): Vector {
-        const canvas_size: Vector = getCanvasDimensions();
+        const canvas_size: Vector = getScreenDimensions();
         const canvas_x: number = canvas_size.x;
         const canvas_y: number = canvas_size.y;
         const canvas_rectangle: Rectangle = makeRectangle(0, 0, canvas_x, canvas_y);
@@ -237,7 +242,7 @@ export class RenderLogicManager {
         const screen_start_x: number = screen_bounds.position.x;
         const screen_start_y: number = screen_bounds.position.y;
     
-        const tile_dimensions: Rectangle = TextureManager.getDimensions("tile_l1");
+        const tile_dimensions: Rectangle = TextureManager.getSpriteDimensions("blank");
         const tile_width: number = tile_dimensions.width;
         const tile_height: number = tile_dimensions.height * 0.75; // 0.75 because of grid layout
 
@@ -253,7 +258,7 @@ export class RenderLogicManager {
      * @returns Vector representing the position of the most bottom right corner tile visible
      */
     private static getEndCornerTile(): Vector {
-        const canvas_size: Vector = getCanvasDimensions();
+        const canvas_size: Vector = getScreenDimensions();
         const canvas_x: number = canvas_size.x;
         const canvas_y: number = canvas_size.y;
         const canvas_rectangle: Rectangle = makeRectangle(0, 0, canvas_x, canvas_y);
@@ -262,7 +267,7 @@ export class RenderLogicManager {
         const screen_start_x: number = screen_bounds.position.x + screen_bounds.width;
         const screen_start_y: number = screen_bounds.position.y + screen_bounds.height;
     
-        const tile_dimensions: Rectangle = TextureManager.getDimensions("tile_l1");
+        const tile_dimensions: Rectangle = TextureManager.getSpriteDimensions("blank");
         const tile_width: number = tile_dimensions.width;
         const tile_height: number = tile_dimensions.height * 0.75; // 0.75 because of grid layout
 
@@ -270,28 +275,6 @@ export class RenderLogicManager {
         const tile_y: number = Math.ceil(screen_start_y / tile_height);
 
         return makeVector(tile_x, tile_y);
-    }
-
-    /**
-     * sets a given texture to an appropriate LOD
-     * @param texture a texture without LOD (not its path)
-     * @returns a texture with LOD (not its path)
-     */
-    private static setLOD(texture: string): string {
-        return `${texture}_l${this.getLOD()}`
-    }
-
-    private static getLOD(): number {
-        // neglible to negative effect on performance. Will need to ensure render doesn't scale up LODs
-        return 1;
-        // const zoom: number = GameCamera.getZoom();
-        // if (zoom > 1/4) {
-        //     return 1
-        // } else if (zoom > 1/16) {
-        //     return 2
-        // } else {
-        //     return 3
-        // }
     }
 }
 
@@ -318,7 +301,7 @@ function zoomAndOffsetRectangle(rectangle: Rectangle): Rectangle {
     }
 
     function zoom(rect: Rectangle): Rectangle {
-        const screen_centre: Vector = getCanvasCentre();
+        const screen_centre: Vector = getScreenCentre();
         const zoom: number = GameCamera.getZoom();
         rect = scaleByFocalPoint(rect, screen_centre, zoom);
         return rect;
@@ -335,7 +318,7 @@ function zoomAndOffsetRectangle(rectangle: Rectangle): Rectangle {
  * @returns a Rectangle oppositely scaled and zoomed, such that if zoomed and offset it would regain
  * its initial values.
  */
-export function antiZoomAndOffsetRectangle(rectangle: Rectangle): Rectangle {
+function antiZoomAndOffsetRectangle(rectangle: Rectangle): Rectangle {
     function unoffset(rect: Rectangle): Rectangle {
         const camera: Vector = GameCamera.getPos();
         rect = translateRectangle(rect, camera.x, camera.y);
@@ -343,7 +326,7 @@ export function antiZoomAndOffsetRectangle(rectangle: Rectangle): Rectangle {
     }
 
     function unzoom(rect: Rectangle): Rectangle {
-        const screen_centre: Vector = getCanvasCentre();
+        const screen_centre: Vector = getScreenCentre();
         const zoom: number = 1 / GameCamera.getZoom();
         rect = scaleByFocalPoint(rect, screen_centre, zoom);
         return rect;
@@ -368,7 +351,7 @@ function antiZoomAndOffsetVector(vector: Vector): Vector {
  * @param factor how much to scale the given shape around the focal point by
  * @returns the given rectangle scaled by the factor around the focal point
  */
-export function scaleByFocalPoint(rectangle: Rectangle, focal_point: Vector, factor: number): Rectangle {
+function scaleByFocalPoint(rectangle: Rectangle, focal_point: Vector, factor: number): Rectangle {
     // shift shape such that focal point is on origin (0, 0)
     let scaled_rectangle: Rectangle = translateRectangle(rectangle, -focal_point.x, -focal_point.y);
     // scale the shifted shape, effectively around origin (0, 0)
