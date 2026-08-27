@@ -6,7 +6,7 @@ import { TextureManager, type Boundaries } from "./texture_manager";
 interface Renderer {
     init(): Promise<void>;
     beginFrame(): void;
-    drawSprite(path: string, area: Rectangle, layer: number, color?: string | null): void;
+    drawSprite(path: string, area: Rectangle, color?: string | null, alpha?: number): void;
     endFrame(): void;
 }
 
@@ -57,10 +57,6 @@ class pixiJSrenderer implements Renderer {
             // add texture to cache
             this.texture_cache.set(sprite_label, sprite_texture);
         }
-
-        for (const [k, v] of this.texture_cache) {
-            console.log(k, v.frame);
-        }
      }
 
     /**
@@ -78,7 +74,7 @@ class pixiJSrenderer implements Renderer {
      * @param layer sprite layer
      * @param color sprite coloring (optional)
      */
-    public drawSprite(path: string, area: Rectangle, layer: number, color: string | null = null): void {
+    public drawSprite(path: string, area: Rectangle, color: string | null = null, alpha: number = 1): void {
         let sprite: Sprite;
         const sprite_pool_available: boolean = this.sprite_pool.length > this.active_sprites;
 
@@ -114,13 +110,13 @@ class pixiJSrenderer implements Renderer {
         sprite.width = area.width;
         sprite.height = area.height;
 
-        // sprite.zIndex = layer;
-
         if (color) {
             sprite.tint = color;
         } else {
             sprite.tint = 0xffffff;
         }
+
+        sprite.alpha = alpha;
 
         sprite.visible = true;
 
@@ -164,9 +160,9 @@ export class RenderManager {
         render_queue.forEach((render_order: RenderOrder) => {
             const path: string = render_order.texture;
             const area: Rectangle = render_order.target;
-            const layer: number = render_order.layer;
             const color: string | null = render_order.color; 
-            this.renderer.drawSprite(path, area, layer, color);
+            const alpha: number = render_order.alpha;
+            this.renderer.drawSprite(path, area, color, alpha);
         });
 
         // Clear the render queue in RenderLogicManager

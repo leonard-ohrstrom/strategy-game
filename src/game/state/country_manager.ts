@@ -10,7 +10,11 @@ type Country = {
 }
 
 function makeCountry(tag: string, name: string, color: string): Country {
-    return { tag: tag, name: name, colour: color }
+    return {
+        tag: tag,
+        name: name,
+        colour: color
+    }
 }
 
 export class CountryManager {
@@ -20,8 +24,9 @@ export class CountryManager {
     static async init(): Promise<void> {
         this.country_config = await loadConfig('./data/countries/country_config.ini');
         const countries_array: Array<string> = await fetch('./data/countries/countries.json')
-            .then(response => response.json())
-            .then(data => data);
+        .then(response => response.json())
+        .then(data => data);
+
         countries_array.forEach((tag: string) => {
             const name: string = this.country_config[tag]['name'];
             const colour: string = this.country_config[tag]['colour'];
@@ -30,12 +35,12 @@ export class CountryManager {
         });
     }
 
-    public static country_exists(country_tag: string): boolean {
+    public static tag_valid(country_tag: string): boolean {
         return this.countries.has(country_tag);
     }
 
     public static readCountry(tag: string): Country {
-        if (this.country_exists(tag)) {
+        if (this.tag_valid(tag)) {
             return this.countries.get(tag)!;
         } else {
             console.warn("read country could not find tag:", tag)

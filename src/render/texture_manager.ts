@@ -79,22 +79,17 @@ export class TextureManager {
                 }
 
                 // save in map
-                console.log("saving to map:", sprite_label, "\n", record);
                 this.sprite_map.set(sprite_label, record);
             });
         });
     }
 
     static getSheetLabels(): string[] {
-        // return [...this.sheet_labels];
-        console.warn("not using copy for testing temporarily in getSheetLabels");
-        return this.sheet_labels;
+        return [...this.sheet_labels];
     }
 
     static getSpriteLabels(): string[] {
-        // return [...this.sprite_labels];
-        console.warn("not using copy for testing temporarily in getSpriteLabels");
-        return this.sprite_labels;
+        return [...this.sprite_labels];
     }
 
     static getSpriteBoundaries(sprite_label: string): Boundaries {

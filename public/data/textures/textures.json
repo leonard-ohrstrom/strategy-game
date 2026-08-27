@@ -1,65 +1,159 @@
 {
     "sprite_sheets": {
-        "labels": ["tiles"],
+        "labels": ["tiles", "tiles_lod"],
         "sheets": {
             "tiles": {
                 "path": "./textures/tiles.png",
-                "sprite_labels": ["blank", "plain", "forest", "water", "outline", "striped_outline", "troop"],
+                "sprite_labels": ["blank", "plain", "forest", "water", "outline", "striped_outline", "troop", "thin_outline", "tile_cover"],
                 "sprites": {
                     "blank": {
                         "boundaries": {
                             "x0": 0,
                             "y0": 0,
-                            "x1": 250,
-                            "y1": 279
+                            "x1": 249,
+                            "y1": 278
                         }
                     },
                     "plain": {
                         "boundaries": {
-                            "x0": 251,
+                            "x0": 250,
                             "y0": 0,
-                            "x1": 501,
-                            "y1": 279
+                            "x1": 499,
+                            "y1": 278
                         }
                     },
                     "forest": {
                         "boundaries": {
-                            "x0": 502,
+                            "x0": 500,
                             "y0": 0,
-                            "x1": 752,
-                            "y1": 279
+                            "x1": 749,
+                            "y1": 278
                         }
                     },
                     "water": {
                         "boundaries": {
-                            "x0": 753,
+                            "x0": 750,
                             "y0": 0,
-                            "x1": 1003,
-                            "y1": 279
+                            "x1": 999,
+                            "y1": 278
                         }
                     },
                     "outline": {
                         "boundaries": {
                             "x0": 0,
                             "y0": 280,
-                            "x1": 250,
-                            "y1": 559
+                            "x1": 249,
+                            "y1": 557
                         }
                     },
                     "striped_outline": {
                         "boundaries": {
-                            "x0": 251,
+                            "x0": 250,
                             "y0": 280,
-                            "x1": 501,
-                            "y1": 559
+                            "x1": 499,
+                            "y1": 557
                         }
                     },
                     "troop": {
                         "boundaries": {
-                            "x0": 502,
+                            "x0": 500,
                             "y0": 280,
-                            "x1": 752,
-                            "y1": 559
+                            "x1": 749,
+                            "y1": 557
+                        }
+                    },
+                    "thin_outline": {
+                        "boundaries": {
+                            "x0": 750,
+                            "y0": 280,
+                            "x1": 999,
+                            "y1": 557
+                        }
+                    },
+                    "tile_cover": {
+                        "boundaries": {
+                            "x0": 0,
+                            "y0": 558,
+                            "x1": 249,
+                            "y1": 836
+                        }
+                    }
+                }
+            },
+            "tiles_lod": {
+                "path": "./textures/tiles_lod.png",
+                "sprite_labels": ["lod_blank", "lod_plain", "lod_forest", "lod_water", "lod_outline", "lod_striped_outline", "lod_troop", "lod_thin_outline", "lod_tile_cover"],
+                "sprites": {
+                    "lod_blank": {
+                        "boundaries": {
+                            "x0": 0,
+                            "y0": 0,
+                            "x1": 249,
+                            "y1": 278
+                        }
+                    },
+                    "lod_plain": {
+                        "boundaries": {
+                            "x0": 250,
+                            "y0": 0,
+                            "x1": 499,
+                            "y1": 278
+                        }
+                    },
+                    "lod_forest": {
+                        "boundaries": {
+                            "x0": 500,
+                            "y0": 0,
+                            "x1": 749,
+                            "y1": 278
+                        }
+                    },
+                    "lod_water": {
+                        "boundaries": {
+                            "x0": 750,
+                            "y0": 0,
+                            "x1": 999,
+                            "y1": 278
+                        }
+                    },
+                    "lod_outline": {
+                        "boundaries": {
+                            "x0": 0,
+                            "y0": 280,
+                            "x1": 249,
+                            "y1": 557
+                        }
+                    },
+                    "lod_striped_outline": {
+                        "boundaries": {
+                            "x0": 250,
+                            "y0": 280,
+                            "x1": 499,
+                            "y1": 557
+                        }
+                    },
+                    "lod_troop": {
+                        "boundaries": {
+                            "x0": 500,
+                            "y0": 280,
+                            "x1": 749,
+                            "y1": 557
+                        }
+                    },
+                    "lod_thin_outline": {
+                        "boundaries": {
+                            "x0": 750,
+                            "y0": 280,
+                            "x1": 999,
+                            "y1": 557
+                        }
+                    },
+                    "lod_tile_cover": {
+                        "boundaries": {
+                            "x0": 0,
+                            "y0": 0,
+                            "x1": 249,
+                            "y1": 278
                         }
                     }
                 }

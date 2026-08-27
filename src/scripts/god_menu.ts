@@ -1,4 +1,7 @@
+import { TroopManager } from "../game/state/division_manager";
 import { TileMapManager } from "../game/state/tile_map";
+import { makeVector } from "../types/type_constructors";
+import type { Vector } from "../types/types";
 
 function getElement(id: string): HTMLInputElement {
     return document.getElementById(id) as HTMLInputElement;
@@ -15,9 +18,11 @@ function applyGodMenu() {
         case "terrain":
             TileMapManager.setTerrain(tile_x, tile_y, input);
             break;
-        case "troops":
-            const amount = Number(input);
-            TileMapManager.setTroops(tile_x, tile_y, amount);
+        case "troop_add":
+            TroopManager.createTroop(makeVector(tile_x, tile_y), input);
+            break;
+        case "troop_remove":
+            TroopManager.deleteTroop(input);
             break;
         case "owner":
             TileMapManager.setOwner(tile_x, tile_y, input);
@@ -33,4 +38,9 @@ function applyGodMenu() {
     getElement("god_tile_x").value = "";
     getElement("god_tile_y").value = "";
     getElement("god_input").value = "";
+}
+
+export function godMenuSelectTile(tile_pos: Vector): void {
+    getElement("god_tile_x").value = tile_pos.x.toString();
+    getElement("god_tile_y").value = tile_pos.y.toString();
 }

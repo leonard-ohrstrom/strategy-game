@@ -3,11 +3,28 @@
  */
 import { type Vector, type Rectangle } from "./types";
 
-export function makeVector(a : number, b: number): Vector {
+export function makeVector(a: number, b: number): Vector {
     return {
         x : a,
         y : b
     }
+}
+
+export function addVector(vector1: Vector, vector2: Vector): Vector {
+    return makeVector(vector1.x + vector2.x, vector1.y + vector2.y);
+}
+
+export function subtractVector(vector1: Vector, vector2: Vector): Vector {
+    const vector2_inverse: Vector = scaleVector(vector2, -1);
+    return addVector(vector1, vector2_inverse);
+}
+
+export function scaleVector(vector: Vector, factor: number): Vector {
+    return makeVector(vector.x * factor, vector.y * factor);
+}
+
+export function VectorEquals(vector1: Vector, vector2: Vector): boolean {
+    return vector1.x === vector2.x && vector1.y === vector2.y;
 }
 
 export function makeRectangle(x0 : number, y0: number, x1: number, y1: number): Rectangle {
@@ -15,11 +32,16 @@ export function makeRectangle(x0 : number, y0: number, x1: number, y1: number): 
     y0 = roundNumber(y0, 3);
     x1 = roundNumber(x1, 3);
     y1 = roundNumber(y1, 3);
+
     return {
         position: makeVector(x0, y0),
         width: x1 - x0,
         height: y1 - y0
     }
+}
+
+export function vectorToString(vector: Vector): string {
+    return `(${vector.x}, ${vector.y})`;
 }
 
 /**
@@ -34,6 +56,14 @@ export function scaleRectangle(rectangle: Rectangle, factor: number): Rectangle 
     const x1: number = (rectangle.position.x + rectangle.width) * factor;
     const y1: number = (rectangle.position.y + rectangle.height) * factor;
     return makeRectangle(x0, y0, x1, y1);
+}
+
+/**
+ * Scales width and height of rectangle by factor.
+ */
+export function factorRectangle(rectangle: Rectangle, factor: number): void {
+    rectangle.width *= factor;
+    rectangle.height *= factor;
 }
 
 /**

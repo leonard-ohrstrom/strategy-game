@@ -9,7 +9,7 @@
       margin: 0;
       padding: 0;
       border: 0px;
-      overflow:hidden;
+      overflow: hidden;
     }
 
     #god_menu {
@@ -31,12 +31,13 @@
 <body>
   <div id="god_menu">God Menu <br>
     tile
-    <input type="number" id="god_tile_x" placeholder="x" style="width: 30px">
-    <input type="number" id="god_tile_y" placeholder="y" style="width: 30px"> <br>
+    <input type="number" id="god_tile_x" placeholder="x" style="width: 60px">
+    <input type="number" id="god_tile_y" placeholder="y" style="width: 60px"> <br>
     action
       <select id="god_action">
         <option value="terrain">set terrain</option>
-        <option value="troops">set troops</option>
+        <option value="troop_add">add troop</option>
+        <option value="troop_remove">remove troop</option>
         <option value="owner">set owner</option>
         <option value="read">read tile</option>
       </select> <br>
@@ -46,7 +47,7 @@
       <input type="button" id="god_apply_button" value="apply">
     </div>
   </div>
-  <script type="module" src="/src/webpage/main.ts"></script>
-  <script type="module" src="/src/webpage/god_menu.ts"></script>
+  <script type="module" src="/src/scripts/main.ts"></script>
+  <script type="module" src="/src/scripts/god_menu.ts"></script>
 </body>
 </html>
