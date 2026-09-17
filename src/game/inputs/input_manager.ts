@@ -7,7 +7,8 @@ import type { Vector } from "../../types/types";
 import { makeVector } from "../../types/type_constructors";
 import { GameCamera } from "../../render/game_camera";
 import { TileMapManager } from "../state/tile_map";
-import { TroopManager } from "../state/division_manager";
+import { TroopManager } from "../state/troop_manager";
+import { GameMapManager } from "../state/tick/game_map_manager";
 
 export class InputManager {
     private static active_keys: Set<string> = new Set();
@@ -37,52 +38,108 @@ export class InputManager {
         const factor: number = delta_time / GameCamera.getZoom();
 
         if (this.keyDown("arrowup")) {
-            GameCamera.incrementPos(0, -factor);
+            Inputs.cameraUp(factor);
         }
 
         if (this.keyDown("arrowdown")) {
-            GameCamera.incrementPos(0, factor);
-        }
-
-        if (this.keyDown("arrowright")) {
-            GameCamera.incrementPos(factor, 0);
+            Inputs.cameraDown(factor);
         }
 
         if (this.keyDown("arrowleft")) {
-            GameCamera.incrementPos(-factor, 0);
+            Inputs.cameraLeft(factor);
+        }
+
+        if (this.keyDown("arrowright")) {
+            Inputs.cameraRight(factor);
         }
     }
 
     static pressedKey(key: string): void {
         switch(key) {
             case "+":
-                GameCamera.zoomIn();
+                Inputs.cameraZoomIn();
                 break;
             case "-":
-                GameCamera.zoomOut();
+                Inputs.cameraZoomOut();
                 break;
             case "escape":
-                TileMapManager.unselectTile();
+                Inputs.deselect();
                 break;
+            case "m":
+                Inputs.stepMapMode();
         }
     }
 
     static pressedMouseKey(key: string): void {
         switch(key) {
             case "0":
-                // left click
-                TileMapManager.selectTile();
-                break;
+                // left mouse button
+                if (this.keyDown("control")) {
+                    // control left click
+                    // add troop on mouse to selected troops
+                    break;
+                } else {
+                    // left click
+                    Inputs.pressTile();
+                }
+            break;
             case "2":
-                // right click
                 if (this.keyDown("control")) {
                     // control right click
-                    TroopManager.enqueueTroopToMouse();
+                    Inputs.enqueueMoveTroops();
                 } else {
-                    // right click
-                    TroopManager.setTroopToMouse();
+                    // right mouse button
+                    Inputs.moveTroops();
                 }
-                break;
+            break;
         }
+    }
+}
+
+class Inputs {
+    static cameraUp(factor: number): void {
+        GameCamera.incrementPos(0, -factor);
+    }
+
+    static cameraDown(factor: number): void {
+        GameCamera.incrementPos(0, factor);
+    }
+
+    static cameraLeft(factor: number): void {
+        GameCamera.incrementPos(-factor, 0);
+    }
+
+    static cameraRight(factor: number): void {
+        GameCamera.incrementPos(factor, 0);
+    }
+
+    static cameraZoomIn(): void {
+        GameCamera.zoomIn();
+    }
+
+    static cameraZoomOut(): void {
+        GameCamera.zoomOut();
+    }
+
+    static pressTile(): void {
+        TileMapManager.selectMouseTile();
+    }
+
+    static moveTroops(): void {
+        TroopManager.moveTroopsToMouse();
+    }
+
+    static enqueueMoveTroops(): void {
+        console.log("enqueueing movement");
+        TroopManager.enqueueMoveTroopsToMouse();
+    }
+
+    static deselect(): void {
+        TileMapManager.unselectTile();
+        TroopManager.unselectAllTroops();
+    }
+
+    static stepMapMode(): void {
+        GameMapManager.stepMapMode();
     }
 }

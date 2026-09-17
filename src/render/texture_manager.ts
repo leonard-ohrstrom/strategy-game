@@ -140,4 +140,17 @@ export class TextureManager {
         // make Rectangle
         return makeRectangle(x0, y0, x1, y1);
     }
+
+    public static getTerrainBase(terrain: string): string {
+        return `tile_${terrain}_base`;
+    }
+
+    public static getTerrainDetail(terrain: string): string {
+        return `tile_${terrain}_detail`;
+    }
+
+    public static terrainHasDetail(terrain: string): boolean {
+        const detail_terrains: string[] = ["forest", "marsh", "mountain", "jungle"];
+        return detail_terrains.includes(terrain);
+    }
 }

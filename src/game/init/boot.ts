@@ -11,10 +11,10 @@ import { GameCamera } from "../../render/game_camera";
 import { makeVector } from "../../types/type_constructors";
 
 async function buildMap(): Promise<void> {
-    // await TileMapManager.loadMapFile();
+    await TileMapManager.loadMapFile();
     // zoomToSweden();
-    TileMapManager.makeGrid(32, 32);
-    initTileOwners();
+    // TileMapManager.makeGrid(32, 32);
+    // initTileOwners();
 }
 
 function zoomToSweden(): void {

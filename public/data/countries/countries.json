@@ -1,1 +1,7 @@
-["SWE", "DEN"]
+[
+    "SWE", "NOR", "DEN", "FIN", "EST", "LTV", "LTH", "GER", "POL", "CZE", "AUT", "HUN", "ROM", "YUG", "BUL", "ALB", "GRE",
+    "NTH", "BEL", "LUX", "SWI", "FRA", "ITA", "ENG", "IRE", "SPA", "POR", "SOV", "TUR", "ETH", "SAU", "IRN", "AFG",
+    "AUS", "NZE", "CAN", "USA", "MEX", "CUB", "HAI", "DCA", "GUA", "SAL", "HON", "NIC", "COS", "PAN", "COL", "VEN",
+    "ECU", "PER", "BRA", "BOL", "PAR", "CHL", "ARG", "URG", "JAP", "MAN", "MGJ", "TUV", "MON", "SIN", "CHI", "TIB",
+    "NEP", "BHU", "TAI"
+]

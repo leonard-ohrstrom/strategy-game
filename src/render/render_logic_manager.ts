@@ -9,9 +9,11 @@ import type { Rectangle, Vector } from "../types/types";
 import { GameCamera } from "./game_camera";
 import { CountryManager } from "../game/state/country_manager";
 import { mousePositionManager } from "./mouse_position";
-import { TroopManager } from "../game/state/division_manager";
+import { TroopManager } from "../game/state/troop_manager";
+import { GameMapManager } from "../game/state/tick/game_map_manager";
 
-export type RenderOrder = { texture: string, target: Rectangle, layer: number, color: string | null, alpha: number }
+export type RenderOrder = { texture: string, target: Rectangle, layer: number, color: string | null, alpha: number, blend: string }
+type TileRender_Func = (x: number, y: number) => RenderOrder | null
 
 export class RenderLogicManager {
     private static render_queue: RenderOrder[] = [];
@@ -24,8 +26,7 @@ export class RenderLogicManager {
         this.updateTileDetail();
         this.enqueueRenders();
         this.zoomAndOffsetQueuedRenders();
-        this.updateRenderOrderTextureLOD();
-        return [...this.render_queue];
+        return this.render_queue;
     }
 
     private static enqueueRenders(): void {
@@ -44,16 +45,14 @@ export class RenderLogicManager {
         this.render_queue = this.render_queue.map(zoomAndOffsetRender);
     }
 
-    private static updateRenderOrderTextureLOD(): void {
-        if (lodTexture()) {
-            this.render_queue.forEach((render_order: RenderOrder) => {
-                render_order.texture = `lod_${render_order.texture}`;
+    private static pushToQueue(render_order: RenderOrder | RenderOrder[]): void {
+        if (Array.isArray(render_order)) {
+            render_order.forEach((render_order: RenderOrder) => {
+                this.render_queue.push(render_order);
             });
+        } else {
+            this.render_queue.push(render_order);
         }
-    }
-
-    private static pushToQueue(render_order: RenderOrder): void {
-        this.render_queue.push(render_order);
     }
 
     /**
@@ -81,42 +80,106 @@ export class RenderLogicManager {
         const end_x: number = Math.min(map_width, max_x + 1);
         const end_y: number = Math.min(map_height, max_y + 1);
 
-        for (let x = start_x; x < end_x; x += this.tile_detail) {
-            for (let y = start_y; y < end_y; y += this.tile_detail) {
-                const tile: Tile = TileMapManager.readTile(x, y);
+        const incrementation: number = this.tile_detail;
 
-                // render terrain
-                const terrain_render: RenderOrder = this.getTerrainRender(x, y);
-                this.pushToQueue(terrain_render);
+        const map_mode: string = GameMapManager.getMapMode();
+        
+        let owner_renders: RenderOrder[] = [];
+        let terrain_detail_renders: RenderOrder[] = [];
 
-                // render owner
-                if (tile.getOwner() !== null) {
-                    const owner_render: RenderOrder = this.getOwnerRender(x, y);
-                    this.pushToQueue(owner_render);
-                }
-
-                // render occupation
-                if (tile.isOccupied()) {
-                    const occupation_render: RenderOrder = this.getOccupationRender(x, y);
-                    this.pushToQueue(occupation_render);
-                }
-
-                // render soldiers
-                if (TroopManager.tileHasTroops(makeVector(x, y))) {
-                    const troop_render: RenderOrder = this.getTroopRender(x, y);
-                    this.pushToQueue(troop_render);
-                }
-            }
+        if (map_mode === "political") {
+            owner_renders = this.renderGridFunc(start_x, start_y, end_x, end_y, incrementation, (x, y) => this.renderOwnerIf(x, y));
+        } else if (map_mode === "tactical") {
+            owner_renders = this.renderGridFunc(start_x, start_y, end_x, end_y, incrementation, (x, y) => this.renderOwnerSemiIf(x, y));
+            terrain_detail_renders = this.renderGridFunc(start_x, start_y, end_x, end_y, incrementation, (x, y) => this.renderTerrainDetailIf(x, y));
+        } else if (map_mode === "terrain") {
+            terrain_detail_renders = this.renderGridFunc(start_x, start_y, end_x, end_y, incrementation, (x, y) => this.renderTerrainDetailIf(x, y));
         }
 
-        // render tile selection
+        const terrain_base_renders: RenderOrder[] = this.renderGridFunc(start_x, start_y, end_x, end_y, incrementation, (x, y) => this.getTerrainBaseRender(x, y));
+        const occupation_renders: RenderOrder[] = this.renderGridFunc(start_x, start_y, end_x, end_y, incrementation, (x, y) => this.renderOccupationIf(x, y));
+        const troop_renders: RenderOrder[] = this.renderGridFunc(start_x, start_y, end_x, end_y, incrementation, (x, y) => this.renderTroopIf(x, y));
+        const troop_selections_renders: RenderOrder[] = this.renderGridFunc(start_x, start_y, end_x, end_y, incrementation, (x, y) => this.renderTroopSelectionIf(x, y));
+
+        this.pushToQueue(owner_renders);
+        this.pushToQueue(terrain_base_renders);
+        this.pushToQueue(terrain_detail_renders);
+        this.pushToQueue(occupation_renders);
+        this.pushToQueue(troop_renders);
+        this.pushToQueue(troop_selections_renders);
+
+        this.renderTileSelectionHover();
+        this.renderTileSelection();
+    }
+
+    private static renderOwnerIf(x: number, y: number): RenderOrder | null {
+        const tile: Tile = TileMapManager.readTile(x, y);
+        if (tile.getOwner()) {
+            return this.getOwnerRender(x, y);
+        } else {
+            return null;
+        }
+    }
+
+    private static renderTerrainDetailIf(x: number, y: number): RenderOrder | null {
+        const tile: Tile = TileMapManager.readTile(x, y);
+        const tile_terrain: string = tile.getTerrain();
+        const tile_has_detail: boolean = TextureManager.terrainHasDetail(tile_terrain);
+        if (tile_has_detail) {
+            return this.getTerrainDetailRender(x, y);
+        } else {
+            return null;
+        }
+    }
+
+    private static renderOwnerSemiIf(x: number, y: number): RenderOrder | null {
+        const tile: Tile = TileMapManager.readTile(x, y);
+        if (tile.getOwner()) {
+            return this.getOwnerRenderSemi(x, y);
+        } else {
+            return null;
+        }
+    }
+
+    private static renderOccupationIf(x: number, y: number): RenderOrder | null {
+        const tile: Tile = TileMapManager.readTile(x, y);
+        if (tile.isOccupied()) {
+            return this.getOccupationRender(x, y);
+        } else {
+            return null;
+        }
+    }
+
+    private static renderTroopIf(x: number, y: number): RenderOrder | null {
+        const tile_has_troops: boolean = TroopManager.tileHasTroops(makeVector(x, y));
+        if (tile_has_troops) {
+            return this.getTroopRender(x, y);
+        } else {
+            return null;
+        }
+    }
+
+    private static renderTroopSelectionIf(x: number, y: number): RenderOrder | null {
+        const troops_on_tile: string[] = TroopManager.getTroopsOnTile(makeVector(x, y));
+        const tile_has_selected_troop: boolean = troops_on_tile.some((tag) => {
+            return TroopManager.getSelectedTroops().includes(tag);
+        });
+        if (tile_has_selected_troop) {
+            return this.getSelectedTroopRender(x, y);
+        } else {
+            return null;
+        }
+    }
+
+    private static renderTileSelectionHover(): void {
         const tile_selection: Vector | null = this.tileOnMouse();
-        if (tile_selection) { 
+        if (tile_selection) {
             const tile_selection_render: RenderOrder = this.getTileSelectionRender(tile_selection.x, tile_selection.y);
             this.pushToQueue(tile_selection_render);
         }
-    
-        // render selected tile
+    }
+
+    private static renderTileSelection(): void {
         const selected_tile: Vector | null = TileMapManager.getSelectedTile();
         if (selected_tile) {
             const selected_tile_render: RenderOrder = this.getSelectedTileRender(selected_tile.x, selected_tile.y);
@@ -124,11 +187,43 @@ export class RenderLogicManager {
         }
     }
 
-    private static getTerrainRender(x: number, y: number): RenderOrder {
+    /**
+     * Creates render orders for grid from point(start_x, start_y) **up to** (but not including!) point(end_x, end_y)
+     */
+    private static renderGridFunc(start_x: number, start_y: number, end_x: number, end_y: number, incrementation: number, render_function: TileRender_Func): RenderOrder[] {
+        const render_orders: RenderOrder[] = [];
+        for (let x = start_x; x < end_x; x += incrementation) {
+            for (let y = start_y; y < end_y; y += incrementation) {
+                const render_order: RenderOrder | null = render_function(x, y);
+                if (render_order) {
+                    render_orders.push(render_order);
+                }
+            }
+        }
+        return render_orders;
+    }
+
+    private static getTerrainBaseRender(x: number, y: number): RenderOrder {
         const tile: Tile = TileMapManager.readTile(x, y);
-        const terrain_texture: string = tile.getTerrain();
+        const terrain_label: string = tile.getTerrain();
+        const base_texture: string = TextureManager.getTerrainBase(terrain_label);
         const pos: Vector = makeVector(x, y);
-        const terrain_render: RenderOrder = this.renderOnTileGrid(terrain_texture, pos, 4 * y);
+        const terrain_render: RenderOrder = this.renderOnTileGrid(base_texture, pos, 7 * y);
+        return terrain_render;
+    }
+
+    private static getTerrainDetailRender(x: number, y: number): RenderOrder {
+        const tile: Tile = TileMapManager.readTile(x, y);
+        const terrain_label: string = tile.getTerrain();
+        const detail_texture: string = TextureManager.getTerrainDetail(terrain_label);
+        const pos: Vector = makeVector(x, y);
+        let depth: number;
+        if (terrain_label === "mountain") {
+            depth = 7 * y + 1;
+        } else {
+            depth = 7 * y + 4;
+        }
+        const terrain_render: RenderOrder = this.renderOnTileGrid(detail_texture, pos, depth);
         return terrain_render;
     }
 
@@ -144,8 +239,31 @@ export class RenderLogicManager {
         }
         const pos: Vector = makeVector(x, y);
         const non_offset: Vector = makeVector(0, 0);
-        const alpha: number = 0.33;
-        const owner_render: RenderOrder = this.renderOnTileGrid("tile_cover", pos, 4 * y + 1, non_offset, owner_colour, alpha);
+        const alpha: number = 1.0;
+        const owner_render: RenderOrder = this.renderOnTileGrid("hexagon_blank", pos, 7 * y + 2, non_offset, owner_colour, alpha);
+        return owner_render;
+    }
+
+    private static getOwnerRenderSemi(x: number, y: number): RenderOrder {
+        const tile: Tile = TileMapManager.readTile(x, y);
+        const owner_tag: string | null = tile.getOwner();
+        let owner_colour: string;
+        if (owner_tag) {
+            owner_colour = CountryManager.readCountry(owner_tag).colour;
+        } else {
+            console.error("no owner tag on tile", x, y);
+            owner_colour = "rgb(0, 0, 0)";
+        }
+        const pos: Vector = makeVector(x, y);
+        const non_offset: Vector = makeVector(0, 0);
+        let alpha: number;
+        if (TileMapManager.isBorder(pos)) {
+            alpha = 0.7;
+        } else {
+            alpha = 0.5;
+        }
+        let blend: string = "normal";
+        const owner_render: RenderOrder = this.renderOnTileGrid("hexagon_blank", pos, 7 * y + 2, non_offset, owner_colour, alpha, blend);
         return owner_render;
     }
 
@@ -161,27 +279,33 @@ export class RenderLogicManager {
         }
         const pos: Vector = makeVector(x, y);
         const non_offset: Vector = makeVector(0, 0);
-        const controller_render: RenderOrder = this.renderOnTileGrid("striped_outline", pos, 4 * y + 2, non_offset, controller_colour);
+        const controller_render: RenderOrder = this.renderOnTileGrid("hexagon_striped", pos, 7 * y + 3, non_offset, controller_colour);
         return controller_render;
     }
 
     private static getTroopRender(x: number, y: number): RenderOrder {
         const pos: Vector = makeVector(x, y);
-        const troop_render: RenderOrder = this.renderOnTileGrid('troop', pos, 4 * y + 3);
+        const troop_render: RenderOrder = this.renderOnTileGrid('troop', pos, 7 * y + 5);
+        return troop_render;
+    }
+
+    private static getSelectedTroopRender(x: number, y: number): RenderOrder {
+        const pos: Vector = makeVector(x, y);
+        const troop_render: RenderOrder = this.renderOnTileGrid('selection_troop', pos, 7 * y + 5);
         return troop_render;
     }
 
     private static getTileSelectionRender(x: number, y: number): RenderOrder {
         const pos: Vector = makeVector(x, y);
         const non_offset: Vector = makeVector(0, 0);
-        const tile_selection_render: RenderOrder = this.renderOnTileGrid('thin_outline', pos, 4 * y + 4, non_offset, "RGB(255, 255, 0)");
+        const tile_selection_render: RenderOrder = this.renderOnTileGrid('selection_outline', pos, 7 * y + 6, non_offset, "RGB(255, 255, 0)");
         return tile_selection_render;
     }
 
     private static getSelectedTileRender(x: number, y: number): RenderOrder {
         let pos: Vector = makeVector(x, y);
         const non_offset: Vector = makeVector(0, 0);
-        const selected_tile_render: RenderOrder = this.renderOnTileGrid('outline', pos, 4 * y + 5, non_offset, "RGB(255, 255, 0)");
+        const selected_tile_render: RenderOrder = this.renderOnTileGrid('selection_outline_thick', pos, 7 * y + 6, non_offset, "RGB(255, 255, 0)");
         return selected_tile_render;
     }
 
@@ -193,10 +317,10 @@ export class RenderLogicManager {
      * @returns RenderOrder representing the texture as a tile on a map grid
      */
     private static renderOnTileGrid(texture: string, position: Vector, layer: number, offset = makeVector(0, 0),
-                                    color: string | null = null, alpha: number = 1) {
-        const tile_dimension: Rectangle = TextureManager.getSpriteDimensions("blank");
+                                    color: string | null = null, alpha: number = 1, blend: string = "normal") {
+        const tile_dimension: Rectangle = TextureManager.getSpriteDimensions("hexagon_blank");
         const tile_size: Vector = makeVector(tile_dimension.width, tile_dimension.height);
-        return this.renderOnGrid(tile_size, position, texture, offset, layer, color, alpha);
+        return this.renderOnGrid(tile_size, position, texture, offset, layer, color, alpha, blend);
     }
 
     /**
@@ -208,7 +332,7 @@ export class RenderLogicManager {
      * @returns RenderOrder representing the texture as a tile in the given grid
      */
     private static renderOnGrid(tile_dimension: Vector, position: Vector, texture: string, offset: Vector,
-                                layer: number, color: string | null = null, alpha: number): RenderOrder {
+                                layer: number, color: string | null, alpha: number, blend: string): RenderOrder {
         const grid_pos_x = position.x;
         const grid_pos_y = position.y;
         const start_x = tile_dimension.x * grid_pos_x + offset.x;
@@ -224,17 +348,19 @@ export class RenderLogicManager {
         const even_layer = grid_pos_y % (2 * this.tile_detail) === 0;
 
         if (even_layer) {
-            target_dimensions = makeRectangle(start_x,
-                                              start_y * 0.75 - scaled_height,
-                                              start_x + tile_dimension.x * this.tile_detail,
-                                              start_y * 0.75 + (this.tile_detail - 1) * scaled_height
-                                            );
+            target_dimensions = makeRectangle(
+                start_x,
+                start_y * 0.75 - scaled_height,
+                start_x + tile_dimension.x * this.tile_detail,
+                start_y * 0.75 + (this.tile_detail - 1) * scaled_height
+            );
         } else {
-            target_dimensions = makeRectangle(start_x + 0.5 * tile_dimension.x * this.tile_detail,
-                                              start_y * 0.75 - scaled_height,
-                                              start_x + 1.5 * tile_dimension.x * this.tile_detail,
-                                              start_y * 0.75 + (this.tile_detail - 1) * scaled_height
-                                            );
+            target_dimensions = makeRectangle(
+                start_x + 0.5 * tile_dimension.x * this.tile_detail,
+                start_y * 0.75 - scaled_height,
+                start_x + 1.5 * tile_dimension.x * this.tile_detail,
+                start_y * 0.75 + (this.tile_detail - 1) * scaled_height
+            );
         }
 
         const tile_render: RenderOrder = {
@@ -242,8 +368,9 @@ export class RenderLogicManager {
             target: target_dimensions,
             layer: layer,
             color: color,
-            alpha: alpha
-        }
+            alpha: alpha,
+            blend: blend
+        };
 
         return tile_render;
     }
@@ -267,7 +394,7 @@ export class RenderLogicManager {
      */
     private static tileOnPixel(pixel: Vector): Vector | null {
         // get base tile dimensions
-        let tile_dimension: Rectangle = this.getTerrainRender(0, 0).target;
+        let tile_dimension: Rectangle = this.getTerrainBaseRender(0, 0).target;
         // zoom and offset base tile dimensions
         tile_dimension = zoomAndOffsetRectangle(tile_dimension);
         // offset pixel by subtracting tile dimension position from it
@@ -307,7 +434,7 @@ export class RenderLogicManager {
         const screen_start_x: number = screen_bounds.position.x;
         const screen_start_y: number = screen_bounds.position.y;
     
-        const tile_dimensions: Rectangle = TextureManager.getSpriteDimensions("blank");
+        const tile_dimensions: Rectangle = TextureManager.getSpriteDimensions("hexagon_blank");
         const tile_width: number = tile_dimensions.width;
         const tile_height: number = tile_dimensions.height * 0.75; // 0.75 because of grid layout
 
@@ -332,7 +459,7 @@ export class RenderLogicManager {
         const screen_end_x: number = screen_bounds.position.x + screen_bounds.width;
         const screen_end_y: number = screen_bounds.position.y + screen_bounds.height;
     
-        const tile_dimensions: Rectangle = TextureManager.getSpriteDimensions("blank");
+        const tile_dimensions: Rectangle = TextureManager.getSpriteDimensions("hexagon_blank");
         factorRectangle(tile_dimensions, margin);
         const tile_width: number = tile_dimensions.width;
         const tile_height: number = tile_dimensions.height * 0.75; // 0.75 because of grid layout
@@ -376,13 +503,6 @@ function zoomAndOffsetRectangle(rectangle: Rectangle): Rectangle {
     const offset_rectangle: Rectangle = offset(rectangle);
     const zoomed_rectangle: Rectangle = zoom(offset_rectangle);
     return zoomed_rectangle;
-}
-
-function zoomAndOffsetVector(vector: Vector): Vector {
-    const vector_rectangle: Rectangle = makeRectangle(vector.x, vector.y, vector.x + 1, vector.y + 1);
-    const zoom_offset_vector_rectangle: Rectangle = zoomAndOffsetRectangle(vector_rectangle);
-    const zoom_offset_vector: Vector = zoom_offset_vector_rectangle.position;
-    return zoom_offset_vector;
 }
 
 /**
@@ -466,12 +586,6 @@ function getRenderDetail(): number {
             console.warn("getRenderDetail no case for fidelity:", fidelity)
             return 10;
     }
-}
-
-function lodTexture(): boolean {
-    const zoom: number = GameCamera.getZoom();
-    const detail: number = getRenderDetail();
-    return zoom < 0.125 || detail !== 1;
 }
 
 function getScreenCentre(): Vector {

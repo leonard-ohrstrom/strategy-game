@@ -6,7 +6,7 @@ import { RenderManager } from "../../../render/render_manager";
 import { GameMapManager } from "./game_map_manager";
 import { InputManager } from "../../inputs/input_manager";
 import { mousePositionManager } from "../../../render/mouse_position";
-import { TroopManager } from "../division_manager";
+import { TroopManager } from "../troop_manager";
 
 export class GameStateManager {
     static async update(delta_time: number) {

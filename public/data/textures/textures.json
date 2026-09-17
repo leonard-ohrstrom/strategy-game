@@ -1,12 +1,19 @@
 {
     "sprite_sheets": {
-        "labels": ["tiles", "tiles_lod"],
+        "labels": ["tiles"],
         "sheets": {
             "tiles": {
                 "path": "./textures/tiles.png",
-                "sprite_labels": ["blank", "plain", "forest", "water", "outline", "striped_outline", "troop", "thin_outline", "tile_cover"],
+                "sprite_labels":
+                [
+                    "tile_plain_base", "tile_forest_base", "tile_hill_base", "tile_marsh_base",
+                    "tile_mountain_base", "tile_desert_base", "tile_snow_base", "tile_water_base",
+                    "tile_jungle_base", "tile_forest_detail", "tile_marsh_detail", "tile_mountain_detail",
+                    "tile_jungle_detail", "hexagon_blank", "hexagon_striped", "selection_outline",
+                    "selection_outline_thick", "selection_troop", "troop"
+                ],
                 "sprites": {
-                    "blank": {
+                    "tile_plain_base": {
                         "boundaries": {
                             "x0": 0,
                             "y0": 0,
@@ -14,7 +21,7 @@
                             "y1": 278
                         }
                     },
-                    "plain": {
+                    "tile_forest_base": {
                         "boundaries": {
                             "x0": 250,
                             "y0": 0,
@@ -22,7 +29,7 @@
                             "y1": 278
                         }
                     },
-                    "forest": {
+                    "tile_hill_base": {
                         "boundaries": {
                             "x0": 500,
                             "y0": 0,
@@ -30,7 +37,7 @@
                             "y1": 278
                         }
                     },
-                    "water": {
+                    "tile_marsh_base": {
                         "boundaries": {
                             "x0": 750,
                             "y0": 0,
@@ -38,122 +45,124 @@
                             "y1": 278
                         }
                     },
-                    "outline": {
+                    "tile_mountain_base": {
+                        "boundaries": {
+                            "x0": 1000,
+                            "y0": 0,
+                            "x1": 1249,
+                            "y1": 278
+                        }
+                    },
+                    "tile_desert_base": {
+                        "boundaries": {
+                            "x0": 1250,
+                            "y0": 0,
+                            "x1": 1499,
+                            "y1": 278
+                        }
+                    },
+                    "tile_snow_base": {
+                        "boundaries": {
+                            "x0": 1500,
+                            "y0": 0,
+                            "x1": 1749,
+                            "y1": 278
+                        }
+                    },
+                    "tile_water_base": {
+                        "boundaries": {
+                            "x0": 1750,
+                            "y0": 0,
+                            "x1": 1999,
+                            "y1": 278
+                        }
+                    },
+                    "tile_jungle_base": {
                         "boundaries": {
                             "x0": 0,
-                            "y0": 280,
+                            "y0": 279,
                             "x1": 249,
                             "y1": 557
                         }
                     },
-                    "striped_outline": {
-                        "boundaries": {
-                            "x0": 250,
-                            "y0": 280,
-                            "x1": 499,
-                            "y1": 557
-                        }
-                    },
-                    "troop": {
-                        "boundaries": {
-                            "x0": 500,
-                            "y0": 280,
-                            "x1": 749,
-                            "y1": 557
-                        }
-                    },
-                    "thin_outline": {
-                        "boundaries": {
-                            "x0": 750,
-                            "y0": 280,
-                            "x1": 999,
-                            "y1": 557
-                        }
-                    },
-                    "tile_cover": {
+                    "tile_forest_detail": {
                         "boundaries": {
                             "x0": 0,
                             "y0": 558,
                             "x1": 249,
                             "y1": 836
                         }
-                    }
-                }
-            },
-            "tiles_lod": {
-                "path": "./textures/tiles_lod.png",
-                "sprite_labels": ["lod_blank", "lod_plain", "lod_forest", "lod_water", "lod_outline", "lod_striped_outline", "lod_troop", "lod_thin_outline", "lod_tile_cover"],
-                "sprites": {
-                    "lod_blank": {
-                        "boundaries": {
-                            "x0": 0,
-                            "y0": 0,
-                            "x1": 249,
-                            "y1": 278
-                        }
                     },
-                    "lod_plain": {
+                    "tile_marsh_detail": {
                         "boundaries": {
                             "x0": 250,
-                            "y0": 0,
+                            "y0": 558,
                             "x1": 499,
-                            "y1": 278
+                            "y1": 836
                         }
                     },
-                    "lod_forest": {
+                    "tile_mountain_detail": {
                         "boundaries": {
                             "x0": 500,
-                            "y0": 0,
+                            "y0": 558,
                             "x1": 749,
-                            "y1": 278
+                            "y1": 836
                         }
                     },
-                    "lod_water": {
+                    "tile_jungle_detail": {
                         "boundaries": {
                             "x0": 750,
-                            "y0": 0,
+                            "y0": 558,
                             "x1": 999,
-                            "y1": 278
+                            "y1": 836
                         }
                     },
-                    "lod_outline": {
+                    "hexagon_blank": {
                         "boundaries": {
                             "x0": 0,
-                            "y0": 280,
+                            "y0": 837,
                             "x1": 249,
-                            "y1": 557
+                            "y1": 1115
                         }
                     },
-                    "lod_striped_outline": {
+                    "hexagon_striped": {
                         "boundaries": {
                             "x0": 250,
-                            "y0": 280,
+                            "y0": 837,
                             "x1": 499,
-                            "y1": 557
+                            "y1": 1115
                         }
                     },
-                    "lod_troop": {
+                    "selection_outline": {
                         "boundaries": {
                             "x0": 500,
-                            "y0": 280,
+                            "y0": 837,
                             "x1": 749,
-                            "y1": 557
+                            "y1": 1115
                         }
                     },
-                    "lod_thin_outline": {
+                    "selection_outline_thick": {
                         "boundaries": {
                             "x0": 750,
-                            "y0": 280,
+                            "y0": 837,
                             "x1": 999,
-                            "y1": 557
+                            "y1": 1115
                         }
                     },
-                    "lod_tile_cover": {
+                    "selection_troop": {
                         "boundaries": {
-                            "x0": 0,
-                            "y0": 0,
-                            "x1": 249,
-                            "y1": 278
+                            "x0": 1000,
+                            "y0": 837,
+                            "x1": 1249,
+                            "y1": 1115
+                        }
+                    },
+                    "troop": {
+                        "boundaries": {
+                            "x0": 1250,
+                            "y0": 837,
+                            "x1": 1499,
+                            "y1": 1115
                         }
                     }
                 }

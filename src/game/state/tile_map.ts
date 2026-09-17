@@ -5,10 +5,11 @@ import { RenderLogicManager } from "../../render/render_logic_manager";
 import { readJSON } from "../../types/file_parser";
 import { getRandomInteger } from "../../types/general_functions";
 import { hexVectorDoubleToOffset, hexVectorOffsetToDouble } from "../../types/hexagons";
-import { addVector, makeVector } from "../../types/type_constructors";
+import { addVector, makeVector, VectorEquals } from "../../types/type_constructors";
 import type { Vector } from "../../types/types";
 import { godMenuSelectTile } from "../../scripts/god_menu";
 import { CountryManager } from "./country_manager";
+import { TroopManager } from "./troop_manager";
 
 export class Tile {
     private terrain: string;
@@ -101,21 +102,26 @@ export class TileMapManager {
     }
 
     public static async loadMapFile(): Promise<void> {
-        const texture_grid: Array<Array<string>> = await readJSON("src/map/output/map.json");
+        const terrain_grid: Array<Array<string>> = await readJSON("src/map/output/map_geo.json");
+        const owner_grid: Array<Array<string>> = await readJSON("src/map/output/map_pol.json");
 
-        const texture_grid_width: number = texture_grid.length;
-        const texture_grid_height: number = texture_grid[0].length;
+        const texture_grid_width: number = terrain_grid.length;
+        const texture_grid_height: number = terrain_grid[0].length;
 
         for (let x = 0; x < texture_grid_width; x++) {
+            this.tile_grid[x] = [];
             for (let y = 0; y < texture_grid_height; y++) {
-                const tile_terrain: string = texture_grid[x][y];
-                if (tile_terrain === "blank") {
-                    texture_grid[x][y] = getRandomTerrain();
+                const terrain: string = terrain_grid[x][y];
+                const tile: Tile = new Tile(terrain);
+                this.tile_grid[x][y] = tile;
+                if (terrain != "water") {
+                    const owner_tag: string = owner_grid[x][y];
+                    this.tile_grid[x][y].setOwner(owner_tag);
+                    this.tile_grid[x][y].setController(owner_tag);
                 }
             }
         }
 
-        this.tile_grid = texture_grid.map(row => row.map(texture => new Tile(texture)));
         this.width = this.tile_grid.length;
         this.height = this.tile_grid[0].length;
     }
@@ -134,6 +140,10 @@ export class TileMapManager {
             console.error("tile_maps.ts ReadTile", x, y, "accessing error");
             return new Tile('');
         }
+    }
+
+    public static getOwner(x: number, y: number): string {
+        return this.tile_grid[x][y].getOwner()!;
     }
 
     public static setTerrain(x: number, y: number, terrain: string): void {
@@ -163,7 +173,7 @@ export class TileMapManager {
     public static getNeighbours(tile_position: Vector, condition: (tile_position: Vector) => boolean = () => true): Vector[] {
         const neighbours: Vector[] = [];
 
-        const tile_position_double: Vector = tile_position;
+        const tile_position_double: Vector = hexVectorOffsetToDouble(tile_position);
         const north_east: Vector = makeVector(1, -1);
         const east: Vector = makeVector(2, 0);
         const south_east: Vector = makeVector(1, 1);
@@ -190,6 +200,32 @@ export class TileMapManager {
         return neighbours;
     }
 
+    public static isBorder(tile_position: Vector): boolean {
+        const min_y: number = 0;
+        const max_y: number = this.readHeight() - 1;
+
+        if (tile_position.y === min_y || tile_position.y === max_y) {
+            return true;
+        }
+
+        function different_owner(neighbour_tile_pos: Vector): boolean {
+            const this_owner: string = TileMapManager.getOwner(tile_position.x, tile_position.y);
+            const neighbour_owner: string = TileMapManager.getOwner(neighbour_tile_pos.x, neighbour_tile_pos.y);
+
+            return this_owner !== neighbour_owner;
+        }
+
+        const diff_owner_neighbours = this.getNeighbours(tile_position, (neighbour) => different_owner(neighbour));
+
+        return diff_owner_neighbours.length > 0;
+    }
+
+    /**
+     * Finds path from one tile to another. Ensure tile positions are in offset format before invoking.
+     * @param start (Vector) starting tile in offset format
+     * @param end (Vector) target tile in offset format
+     * @returns (Vector[]) path from start to end, not including start tile
+     */
     public static getPath(start: Vector, end: Vector): Vector[] {
         start = hexVectorOffsetToDouble(start);
         end = hexVectorOffsetToDouble(end);
@@ -207,17 +243,16 @@ export class TileMapManager {
         const left: boolean = start.x > end.x;
         const right: boolean = start.x < end.x;
 
-        
         if (start_is_end) {
             return [];
         } else if (above && right) {
             start = addVector(start, north_east);
         } else if (above) {
             start = addVector(start, north_west);
-        } else if (below && left) {
-            start = addVector(start, south_west);
-        } else if (below) {
+        } else if (below && right) {
             start = addVector(start, south_east);
+        } else if (below) {
+            start = addVector(start, south_west);
         } else if (right) {
             start = addVector(start, east);
         } else if (left) {
@@ -229,12 +264,30 @@ export class TileMapManager {
 
         start = hexVectorDoubleToOffset(start);
         end = hexVectorDoubleToOffset(end);
-        const remaining_path = this.getPath(start, end); // might cause major memory issues lol should probably be recursive
+        const remaining_path = this.getPath(start, end); // might cause large stack growth lol should probably be iterative
+
         return [start].concat(remaining_path);
     }
 
-    public static selectTile(): void {
-        this.setSelectedTile(RenderLogicManager.tileOnMouse());
+    // TODO: clean up this ugly code
+    public static selectMouseTile(): void {
+        const mouse_tile: Vector | null = RenderLogicManager.tileOnMouse();
+
+        // Selecting already selected tile
+        const double_select: boolean = !!mouse_tile && !!this.selected_tile && VectorEquals(mouse_tile, this.selected_tile);
+
+        if (double_select) {
+            const troops_on_tile: string[] = TroopManager.getTroopsOnTile(this.selected_tile!); // selected tile already guaranteed non-null in bool double_select
+            this.unselectTile();
+    
+            troops_on_tile.forEach((tag: string) => {
+                TroopManager.selectTroop(tag);
+            });
+        }
+        else {
+            TroopManager.unselectAllTroops();
+            this.setSelectedTile(mouse_tile);
+        }
     }
 
     public static unselectTile(): void {

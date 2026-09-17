@@ -6,7 +6,7 @@ import { TextureManager, type Boundaries } from "./texture_manager";
 interface Renderer {
     init(): Promise<void>;
     beginFrame(): void;
-    drawSprite(path: string, area: Rectangle, color?: string | null, alpha?: number): void;
+    drawSprite(path: string, area: Rectangle, layer?: number, color?: string | null, alpha?: number, blend?: string): void;
     endFrame(): void;
 }
 
@@ -74,7 +74,7 @@ class pixiJSrenderer implements Renderer {
      * @param layer sprite layer
      * @param color sprite coloring (optional)
      */
-    public drawSprite(path: string, area: Rectangle, color: string | null = null, alpha: number = 1): void {
+    public drawSprite(path: string, area: Rectangle, layer: number = 0, color: string | null = null, alpha: number = 1, blend: "normal" | "multiply" | "add" | "screen" = "normal"): void {
         let sprite: Sprite;
         const sprite_pool_available: boolean = this.sprite_pool.length > this.active_sprites;
 
@@ -110,6 +110,8 @@ class pixiJSrenderer implements Renderer {
         sprite.width = area.width;
         sprite.height = area.height;
 
+        sprite.zIndex = layer;
+
         if (color) {
             sprite.tint = color;
         } else {
@@ -117,6 +119,8 @@ class pixiJSrenderer implements Renderer {
         }
 
         sprite.alpha = alpha;
+
+        sprite.blendMode = blend;
 
         sprite.visible = true;
 
@@ -160,9 +164,11 @@ export class RenderManager {
         render_queue.forEach((render_order: RenderOrder) => {
             const path: string = render_order.texture;
             const area: Rectangle = render_order.target;
+            const layer: number = render_order.layer;
             const color: string | null = render_order.color; 
             const alpha: number = render_order.alpha;
-            this.renderer.drawSprite(path, area, color, alpha);
+            const blend: string = render_order.blend;
+            this.renderer.drawSprite(path, area, layer, color, alpha, blend);
         });
 
         // Clear the render queue in RenderLogicManager

@@ -1,11 +1,12 @@
 import { RenderLogicManager } from "../../render/render_logic_manager";
-import { makeVector, VectorEquals, vectorToString } from "../../types/type_constructors";
+import { vectorToString } from "../../types/type_constructors";
 import type { Vector } from "../../types/types";
 import { TileMapManager } from "./tile_map";
 
 export class TroopManager {
     private static troop_by_tag: Map<string, Troop> = new Map;
     private static troops_on_tile: Map<string, string[]> = new Map;
+    private static selected_troops: string[] = [];
 
     public static update(delta_time: number): void {
         this.troop_by_tag.forEach((troop: Troop) => {
@@ -26,12 +27,12 @@ export class TroopManager {
         }
 
         // remove tag from old position on position Map-Array
-        const old_pos_string: string = vectorToString(troop.pos());
+        const old_pos_string: string = vectorToString(troop.read_pos());
 
-        let old_pos_troops: string[] = this.getTileTroops(troop.pos());
+        let old_pos_troops: string[] = this.getTroopsOnTile(troop.read_pos());
 
         old_pos_troops = old_pos_troops.filter((tile_troop_tag: string) => {
-            tile_troop_tag !== tag;
+            return (tile_troop_tag !== tag);
         });
 
         this.troops_on_tile.set(old_pos_string, old_pos_troops);
@@ -39,57 +40,34 @@ export class TroopManager {
         // add tag to new position on position Map-Array
         const new_pos_string: string = vectorToString(new_pos);
 
-        const new_tile_troops: string[] = this.getTileTroops(new_pos);
+        const new_tile_troops: string[] = this.getTroopsOnTile(new_pos);
 
         new_tile_troops.push(tag);
 
         this.troops_on_tile.set(new_pos_string, new_tile_troops);
     }
 
-    public static setTroopToMouse(): void {
+    public static moveTroopsToMouse(): void {
         const tile_on_mouse: Vector | null = RenderLogicManager.tileOnMouse();
-        const selected_troop: Troop | null = this.getTroopOnSelectedTile();
     
-        if (!tile_on_mouse || !selected_troop) {
-            return;
-        } else {
-            selected_troop.setMovement(tile_on_mouse);
+        if (tile_on_mouse) {
+            this.selected_troops.forEach((tag: string) => {
+                const troop: Troop = this.getTroopByTag(tag)!;
+                troop.setMovement(tile_on_mouse);
+            });
         }
     }
 
-    public static enqueueTroopToMouse(): void {
+    public static enqueueMoveTroopsToMouse(): void {
         const tile_on_mouse: Vector | null = RenderLogicManager.tileOnMouse();
-        const selected_troop: Troop | null = this.getTroopOnSelectedTile();
     
-        if (!tile_on_mouse || !selected_troop) {
-            return;
-        } else {
-            selected_troop.enqueueMovement(tile_on_mouse);
+        if (tile_on_mouse) {
+            this.selected_troops.forEach((tag: string) => {
+                console.log("enqueueing movement for tag:", tag);
+                const troop: Troop = this.getTroopByTag(tag)!;
+                troop.enqueueMovement(tile_on_mouse);
+            });
         }
-    }
-
-    private static getTroopOnSelectedTile(): Troop | null {
-        const selected_tile: Vector | null = TileMapManager.getSelectedTile();
-
-        if (!selected_tile) {
-            return null;
-        }
-
-        const troops_on_selected_tile: string[] = TroopManager.getTileTroops(selected_tile);
-        const selected_troop_tag: string | undefined = troops_on_selected_tile.pop();
-
-        if (!selected_troop_tag) {
-            return null;
-        }
-
-        const selected_troop: Troop | undefined = this.troop_by_tag.get(selected_troop_tag);
-    
-        if (!selected_troop) {
-            console.error(`no troop with tag ${selected_troop_tag} found in tag Map`);
-            return null;
-        }
-
-        return selected_troop;
     }
 
     /**
@@ -100,18 +78,18 @@ export class TroopManager {
      */
     public static createTroop(position: Vector, owner_tag: string): string {
         const troop: Troop = new Troop(position, owner_tag);
-        const pos_string: string = vectorToString(troop.pos());
-        const tag = troop.tag();
+        const pos_string: string = vectorToString(troop.read_pos());
+        const tag = troop.read_tag();
 
         // add to tag Map
         this.troop_by_tag.set(tag, troop);
 
         // add to position Map-Array
-        const tile_troops = this.getTileTroops(position);
+        const tile_troops: string[] = this.getTroopsOnTile(position);
         tile_troops.push(tag);
         this.troops_on_tile.set(pos_string, tile_troops);
 
-        return troop.tag();
+        return troop.read_tag();
     }
 
     /**
@@ -126,7 +104,7 @@ export class TroopManager {
             return;
         }
 
-        const pos_string = vectorToString(troop.pos());
+        const pos_string = vectorToString(troop.read_pos());
         const tile_troops: string[] | undefined = this.troops_on_tile.get(pos_string);
 
         if (!tile_troops) {
@@ -145,7 +123,7 @@ export class TroopManager {
      * @returns boolean representing if the tile has any troops on it
      */
     public static tileHasTroops(tile_position: Vector): boolean {
-        const has_troops: boolean = this.getTileTroops(tile_position).length > 0;
+        const has_troops: boolean = this.getTroopsOnTile(tile_position).length > 0;
         return has_troops;
     }
 
@@ -154,10 +132,38 @@ export class TroopManager {
      * @param tile_position Vector of a tile position
      * @returns copy of Array of all troop tags on tile position
      */
-    private static getTileTroops(tile_position: Vector): string[] {
+    public static getTroopsOnTile(tile_position: Vector): string[] {
         const pos_string: string = vectorToString(tile_position);
         const troops: string[] = this.troops_on_tile.get(pos_string) ?? [];
         return [...troops];
+    }
+
+    public static getTroopByTag(tag: string): Troop | undefined {
+        return this.troop_by_tag.get(tag);
+    }
+
+    public static getSelectedTroops(): string[] {
+        return [...this.selected_troops];
+    }
+
+    public static troopSelected(tag: string): boolean {
+        return this.selected_troops.includes(tag);
+    }
+
+    public static unselectAllTroops(): void {
+        this.selected_troops = [];
+    }
+
+    public static selectTroop(tag: string): void {
+        if (!this.troopSelected(tag)) {
+            this.selected_troops.push(tag);
+        }
+    }
+
+    public static unselectTroop(tag: string): void {
+        this.selected_troops.filter((troop_tag: string) => {
+            troop_tag !== tag;
+        });
     }
 }
 
@@ -174,19 +180,17 @@ class Troop {
     private movement_queue: Vector[] = [];
     // Percentage (0.00 - 1.00) how much of current movement has been completed.
     private movement_percentage: number = 0;
-    // Which texture on map when rendered
-    private texture: string = "infantry";
 
     constructor(position: Vector, owner_tag: string) {
         this.position = { ...position };
         this.owner_tag = owner_tag;
     }
 
-    public tag(): string {
+    public read_tag(): string {
         return this.troop_tag;
     }
 
-    public owner(): string {
+    public read_owner(): string {
         return this.owner_tag;
     }
 
@@ -194,7 +198,7 @@ class Troop {
      * Returns a copy of the troop's position.
      * @returns [Vector] of troop's position on the map
      */
-    public pos(): Vector {
+    public read_pos(): Vector {
         return { ...this.position };
     }
 
@@ -204,20 +208,17 @@ class Troop {
      */
     public update(elapsed_time: number) {
         const arrived: boolean = this.movement_percentage >= 1;
-        const completion_time: number = 1000; // (milliseconds)
+        const completion_time: number = 500; // (milliseconds)
         if (this.movement && arrived) {
-            // update position in TroopManager
-            TroopManager.updateTroopPos(this.troop_tag, this.movement);
-            // update internal position
-            this.position = this.movement;
-            // decrease movement percentage (retain surplus progress)
-            this.movement_percentage -= 1;
-            // set movement to none
-            this.movement = null;
+            TroopManager.updateTroopPos(this.troop_tag, this.movement); // update position in TroopManager
+            this.position = this.movement; // update internal position
+
+            this.movement_percentage -= 1; // decrease movement percentage (retain surplus progress)
+            this.movement = this.movement_queue.shift() ?? null; // set movement to next (possibly none)
         } else if (this.movement) {
             this.movement_percentage += (elapsed_time / completion_time);
         } else {
-            this.movement = this.movement_queue.shift() ?? null;
+            this.movement = this.movement_queue.shift() ?? null; // see if we have new movement
         }
     }
 
@@ -242,14 +243,19 @@ class Troop {
         const queue_not_empty: boolean = this.movement_queue.length > 0;
 
         if (queue_not_empty) {
-            const end_index = this.movement_queue.length--;
+            const end_index = this.movement_queue.length - 1;
             end_point = this.movement_queue[end_index];
         } else {
             end_point = this.movement ?? this.position;
         }
 
+        console.log(`after this movement:(${end_point.x},${end_point.y})`);
+        console.log(`go to: (${target_tile.x},${target_tile.y})`)
+
         const path: Vector[] = TileMapManager.getPath(end_point, target_tile);
+        console.log(this.movement_queue, path)
         this.movement_queue = this.movement_queue.concat(path);
+        console.log(this.movement_queue);
     }
 
     /**

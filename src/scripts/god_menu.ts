@@ -1,5 +1,5 @@
-import { TroopManager } from "../game/state/division_manager";
-import { TileMapManager } from "../game/state/tile_map";
+import { TroopManager } from "../game/state/troop_manager";
+import { Tile, TileMapManager } from "../game/state/tile_map";
 import { makeVector } from "../types/type_constructors";
 import type { Vector } from "../types/types";
 
@@ -27,9 +27,13 @@ function applyGodMenu() {
         case "owner":
             TileMapManager.setOwner(tile_x, tile_y, input);
             break;
-        case "read":
-            const tile = TileMapManager.readTile(tile_x, tile_y);
+        case "read_tile":
+            const tile: Tile = TileMapManager.readTile(tile_x, tile_y);
             console.log(tile);
+            break;
+        case "read_tile_troops":
+            const troops: string[] = TroopManager.getTroopsOnTile(makeVector(tile_x, tile_y));
+            console.log(troops);
             break;
         default:
             console.error("invalid God Menu action:", action);

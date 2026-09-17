@@ -1,8 +1,30 @@
 /**
- * Manages if and how in game map should be updated data-wise. E.g. troop
- * movement, changing tile owner, etc.
+ * IDK lol
  */
 
 export class GameMapManager {
-    static update(delta_time: number) {}
+    private static map_mode: string = "tactical";
+    private static valid_map_modes: string[] = ["political", "terrain", "tactical"];
+
+    public static update(delta_time: number) {}
+
+    public static getMapMode(): string {
+        return this.map_mode;
+    }
+
+    public static setMapMode(mode: string): void {
+        if (this.valid_map_modes.includes(mode)) {
+            this.map_mode = mode;
+        } else {
+            console.error(`Unable to set map mode to "${mode}"`);
+        }
+    }
+
+    public static stepMapMode(): void {
+        const mode_max_modulu: number = this.valid_map_modes.length;
+        let map_mode_index: number = this.valid_map_modes.indexOf(this.map_mode);
+
+        map_mode_index = (map_mode_index + 1) % mode_max_modulu;
+        this.map_mode = this.valid_map_modes[map_mode_index];
+    }
 }
