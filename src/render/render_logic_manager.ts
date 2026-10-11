@@ -4,13 +4,14 @@
  */
 import { TextureManager } from "./texture_manager";
 import { Tile, TileMapManager } from "../game/state/tile_map";
-import { factorRectangle, makeRectangle, makeVector, scaleRectangle, scaleVector, subtractVector, translateRectangle } from "../types/type_constructors";
+import { makeRectangle, makeVector, scaleRectangle, scaleVector, subtractVector, translateRectangle } from "../types/type_constructors";
 import type { Rectangle, Vector } from "../types/types";
 import { GameCamera } from "./game_camera";
 import { CountryManager } from "../game/state/country_manager";
 import { mousePositionManager } from "./mouse_position";
 import { TroopManager } from "../game/state/troop_manager";
 import { GameMapManager } from "../game/state/tick/game_map_manager";
+import { addRgbValue } from "../types/rgb";
 
 export type RenderOrder = { texture: string, target: Rectangle, layer: number, color: string | null, alpha: number, blend: string }
 type TileRender_Func = (x: number, y: number) => RenderOrder | null
@@ -20,17 +21,18 @@ export class RenderLogicManager {
     private static tile_detail: number = 1;
 
     /**
-     * Returns the render queue of a given queue
+     * Returns the render queue of a given queue.
      **/
     public static getRenderQueue(): RenderOrder[] {
-        this.updateTileDetail();
         this.enqueueRenders();
-        this.zoomAndOffsetQueuedRenders();
         return this.render_queue;
     }
 
     private static enqueueRenders(): void {
+        this.clearRenderQueue();
+        this.updateTileDetail();
         this.enqueueTiles();
+        this.zoomAndOffsetQueuedRenders();
     }
 
     public static clearRenderQueue(): void {
@@ -61,29 +63,16 @@ export class RenderLogicManager {
     private static enqueueTiles(): void {
         const margin: number = 2;
 
-        const start_corner: Vector = this.getStartCornerTile();
-        const min_x: number = start_corner.x - margin;
-        const min_y: number = start_corner.y - margin;
+        const start_point: Vector = this.getStartRenderPoint(margin);
+        const end_point: Vector = this.getEndRenderPoint(margin);
 
-        let start_x: number = Math.max(0, min_x);
-        start_x = Math.floor(start_x / this.tile_detail) * this.tile_detail
-        let start_y: number = Math.max(0, min_y);
-        start_y = Math.floor(start_y / this.tile_detail) * this.tile_detail
-
-        const map_width: number = TileMapManager.readWidth();
-        const map_height: number = TileMapManager.readHeight();
-
-        const end_corner: Vector = this.getEndCornerTile(1);
-        const max_x: number = end_corner.x + margin;
-        const max_y: number = end_corner.y + margin;
-
-        const end_x: number = Math.min(map_width, max_x + 1);
-        const end_y: number = Math.min(map_height, max_y + 1);
-
-        const incrementation: number = this.tile_detail;
-
+        const start_x: number = start_point.x;
+        const start_y: number = start_point.y;
+        const end_x: number = end_point.x;
+        const end_y: number = end_point.y;
         const map_mode: string = GameMapManager.getMapMode();
         
+        const incrementation: number = this.tile_detail;
         let owner_renders: RenderOrder[] = [];
         let terrain_detail_renders: RenderOrder[] = [];
 
@@ -95,7 +84,6 @@ export class RenderLogicManager {
         } else if (map_mode === "terrain") {
             terrain_detail_renders = this.renderGridFunc(start_x, start_y, end_x, end_y, incrementation, (x, y) => this.renderTerrainDetailIf(x, y));
         }
-
         const terrain_base_renders: RenderOrder[] = this.renderGridFunc(start_x, start_y, end_x, end_y, incrementation, (x, y) => this.getTerrainBaseRender(x, y));
         const occupation_renders: RenderOrder[] = this.renderGridFunc(start_x, start_y, end_x, end_y, incrementation, (x, y) => this.renderOccupationIf(x, y));
         const troop_renders: RenderOrder[] = this.renderGridFunc(start_x, start_y, end_x, end_y, incrementation, (x, y) => this.renderTroopIf(x, y));
@@ -107,9 +95,32 @@ export class RenderLogicManager {
         this.pushToQueue(occupation_renders);
         this.pushToQueue(troop_renders);
         this.pushToQueue(troop_selections_renders);
-
         this.renderTileSelectionHover();
         this.renderTileSelection();
+    }
+
+    private static getStartRenderPoint(margin: number): Vector {
+        const start_corner: Vector = this.getStartCornerTile();
+        const min_x: number = start_corner.x - margin;
+        const min_y: number = start_corner.y - margin;
+        let start_x: number = Math.max(0, min_x);
+        let start_y: number = Math.max(0, min_y);
+        start_x = Math.floor(start_x / this.tile_detail) * this.tile_detail;
+        start_y = Math.floor(start_y / this.tile_detail) * this.tile_detail;
+
+        return makeVector(start_x, start_y);
+    }
+
+    private static getEndRenderPoint(margin: number): Vector {
+        const map_width: number = TileMapManager.readWidth();
+        const map_height: number = TileMapManager.readHeight();
+        const end_corner: Vector = this.getEndCornerTile();
+        const max_x: number = end_corner.x + margin;
+        const max_y: number = end_corner.y + margin;
+        const end_x: number = Math.min(map_width, max_x + 1);
+        const end_y: number = Math.min(map_height, max_y + 1);
+
+        return makeVector(end_x, end_y);
     }
 
     private static renderOwnerIf(x: number, y: number): RenderOrder | null {
@@ -188,7 +199,7 @@ export class RenderLogicManager {
     }
 
     /**
-     * Creates render orders for grid from point(start_x, start_y) **up to** (but not including!) point(end_x, end_y)
+     * Creates render orders for grid from point(start_x, start_y) **up to** *(but not including!)* point(end_x, end_y)
      */
     private static renderGridFunc(start_x: number, start_y: number, end_x: number, end_y: number, incrementation: number, render_function: TileRender_Func): RenderOrder[] {
         const render_orders: RenderOrder[] = [];
@@ -257,7 +268,8 @@ export class RenderLogicManager {
         const pos: Vector = makeVector(x, y);
         const non_offset: Vector = makeVector(0, 0);
         let alpha: number;
-        if (TileMapManager.isBorder(pos)) {
+        if (this.tile_detail !== 1 || TileMapManager.isBorder(pos)) {
+            owner_colour = addRgbValue(owner_colour, "RGB(-33, -33, -33)");
             alpha = 0.7;
         } else {
             alpha = 0.5;
@@ -449,7 +461,7 @@ export class RenderLogicManager {
      * for camera) in the lower right corner.
      * @returns Vector representing the position of the most bottom right corner tile visible
      */
-    private static getEndCornerTile(margin: number): Vector {
+    private static getEndCornerTile(): Vector {
         const canvas_size: Vector = getScreenDimensions();
         const canvas_x: number = canvas_size.x;
         const canvas_y: number = canvas_size.y;
@@ -460,7 +472,6 @@ export class RenderLogicManager {
         const screen_end_y: number = screen_bounds.position.y + screen_bounds.height;
     
         const tile_dimensions: Rectangle = TextureManager.getSpriteDimensions("hexagon_blank");
-        factorRectangle(tile_dimensions, margin);
         const tile_width: number = tile_dimensions.width;
         const tile_height: number = tile_dimensions.height * 0.75; // 0.75 because of grid layout
 
@@ -551,6 +562,7 @@ function scaleByFocalPoint(rectangle: Rectangle, focal_point: Vector, factor: nu
 function getRenderDetail(): number {
     const fidelity: string = "medium";
     const zoom: number = GameCamera.getZoomLevel();
+
     switch (fidelity) {
         case "low":
             if (zoom <= 4) {
@@ -584,7 +596,7 @@ function getRenderDetail(): number {
             }
         default:
             console.warn("getRenderDetail no case for fidelity:", fidelity)
-            return 10;
+        return 10;
     }
 }
 

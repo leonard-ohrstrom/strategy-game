@@ -83,18 +83,14 @@ export class TileMapManager {
     private static height: number = 0;
     private static selected_tile: Vector | null = null;
 
-    public static makeGrid(width: number, height: number, terrain: string | undefined = undefined): void {
+    public static makeGrid(width: number, height: number, terrain: string = "blank"): void {
         this.tile_grid = [[]];
         this.width = width;
         this.height = height;
         for (let x = 0; x < width; x++) {
             this.tile_grid[x] = [];
             for (let y = 0; y < height; y++) {
-                let tile_terrain: string | undefined = terrain;
-
-                if (!tile_terrain) {
-                    tile_terrain = getRandomTerrain();
-                }
+                let tile_terrain: string = terrain;
 
                 this.tile_grid[x][y] = new Tile(tile_terrain);
             }
@@ -269,24 +265,20 @@ export class TileMapManager {
         return [start].concat(remaining_path);
     }
 
-    // TODO: clean up this ugly code
     public static selectMouseTile(): void {
-        const mouse_tile: Vector | null = RenderLogicManager.tileOnMouse();
+        const tile_on_mouse: Vector | null = RenderLogicManager.tileOnMouse();
 
-        // Selecting already selected tile
-        const double_select: boolean = !!mouse_tile && !!this.selected_tile && VectorEquals(mouse_tile, this.selected_tile);
+        const clicked_selected_tile: boolean = !!tile_on_mouse && !!this.selected_tile && VectorEquals(tile_on_mouse, this.selected_tile);
 
-        if (double_select) {
+        if (clicked_selected_tile) { // tile was already selected => unselect it, select troops
             const troops_on_tile: string[] = TroopManager.getTroopsOnTile(this.selected_tile!); // selected tile already guaranteed non-null in bool double_select
             this.unselectTile();
-    
             troops_on_tile.forEach((tag: string) => {
                 TroopManager.selectTroop(tag);
             });
-        }
-        else {
+        } else { // tile wasn't selected => select it
             TroopManager.unselectAllTroops();
-            this.setSelectedTile(mouse_tile);
+            this.setSelectedTile(tile_on_mouse);
         }
     }
 
@@ -298,11 +290,8 @@ export class TileMapManager {
         if (!tile_pos) {
             this.selected_tile = tile_pos;
             godMenuSelectTile(makeVector(0, 0));
-        } else if (this.positionExists(tile_pos)) {
-            this.selected_tile = tile_pos;
-            godMenuSelectTile(tile_pos);
         } else {
-            console.error("attempting to select tile", tile_pos, "which does not exist");
+            godMenuSelectTile(tile_pos);
         }
     }
 

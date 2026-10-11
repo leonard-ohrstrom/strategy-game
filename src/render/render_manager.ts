@@ -171,9 +171,6 @@ export class RenderManager {
             this.renderer.drawSprite(path, area, layer, color, alpha, blend);
         });
 
-        // Clear the render queue in RenderLogicManager
-        RenderLogicManager.clearRenderQueue();
-
         // end frame
         this.renderer.endFrame();
     }

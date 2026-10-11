@@ -4,6 +4,7 @@ import { writeFile } from "atomically";
 import { makeRectangle, makeVector } from "../../types/type_constructors";
 import type { Rectangle, Vector } from "../../types/types";
 import sharp, { type OutputInfo } from "sharp";
+import { rgbNumbersToString, rgbStringToNumbers } from "../../types/rgb";
 
 type string_colour = string;
 type ColourAssociation = [string, string_colour];
@@ -24,33 +25,6 @@ function associationValue(association: ColourAssociation): string
 function associationColour(association: ColourAssociation): string
 {
     return association[1];
-}
-
-function rgbStringToNumbers(colour_string: string_colour): [number, number, number]
-{
-    const i_opening_parentheses: number = colour_string.indexOf("(");
-    const i_1st_comma: number = colour_string.indexOf(",", i_opening_parentheses + 1);
-    const i_2nd_comma: number = colour_string.indexOf(",", i_1st_comma + 1);
-    const i_closing_parentheses: number = colour_string.indexOf(")", i_2nd_comma + 1);
-
-    const str_r: string = colour_string.slice(i_opening_parentheses + 1, i_1st_comma);
-    const str_g: string = colour_string.slice(i_1st_comma + 2, i_2nd_comma);
-    const str_b: string = colour_string.slice(i_2nd_comma + 2, i_closing_parentheses);
-
-    const r: number = Number(str_r);
-    const g: number = Number(str_g);
-    const b: number = Number(str_b);
-
-    return [r, g, b];
-}
-
-function rgbNumbersToString(colour_numbers: [number, number, number]): string_colour
-{
-    const r: number = colour_numbers[0];
-    const g: number = colour_numbers[1];
-    const b: number = colour_numbers[2];
-
-    return `RGB(${r}, ${g}, ${b})`;
 }
 
 function rgbStringsDistance(colour1: string_colour, colour2: string_colour): number
