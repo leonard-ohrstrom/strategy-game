@@ -1,7 +1,7 @@
 // npx tsx src/map/generator/map_generator_img.ts
 
 import { writeFile } from "atomically";
-import { makeRectangle, makeVector } from "../../types/type_constructors";
+import { rectangleMake, vectorMake } from "../../types/type_constructors";
 import type { Rectangle, Vector } from "../../types/types";
 import sharp, { type OutputInfo } from "sharp";
 import { rgbNumbersToString, rgbStringToNumbers } from "../../types/rgb";
@@ -116,12 +116,6 @@ function medianRgbSurroundingPixel(image_buffer: [Buffer<ArrayBuffer>, OutputInf
         }
     });
 
-    if (highest_count === 0) {
-        console.warn(`no colours found for (${x}, ${y}) with ${samples} samples`);
-        rgbs_near_pixel.forEach((count, rgb_str) => {
-            console.log("rgb:", rgb_str);
-        });
-    }
     return most_common_rgb;
 }
 
@@ -387,8 +381,8 @@ async function writeJSON(data: any, relative_path: string): Promise<void> {
 const geo_map_image_data: ImageData =
 {
     path: "public/mapgen/hoi4_geo.png",
-    img_dimensions: makeVector(5631, 2047),
-    img_portion: makeRectangle(0, 0, 5631, 2047),
+    img_dimensions: vectorMake(5631, 2047),
+    img_portion: rectangleMake(0, 0, 5631, 2047),
     terrain_colours: terrain_associations
 };
 
@@ -399,8 +393,8 @@ console.log("geography map succesfully generated and written");
 const pol_map_image_data: ImageData =
 {
     path: "public/mapgen/hoi4_pol.png",
-    img_dimensions: makeVector(5631, 2047),
-    img_portion: makeRectangle(0, 0, 5631, 2047),
+    img_dimensions: vectorMake(5631, 2047),
+    img_portion: rectangleMake(0, 0, 5631, 2047),
     terrain_colours: tag_associations
 };
 

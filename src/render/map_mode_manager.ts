@@ -1,12 +1,6 @@
-/**
- * IDK lol
- */
-
-export class GameMapManager {
+export class MapModeManager {
     private static map_mode: string = "tactical";
     private static valid_map_modes: string[] = ["political", "terrain", "tactical"];
-
-    public static update(delta_time: number) {}
 
     public static getMapMode(): string {
         return this.map_mode;

@@ -3,14 +3,14 @@
  * instructions of what to draw. Warning: here be spaghetti code
  */
 import { TextureManager } from "./texture_manager";
-import { Tile, TileMapManager } from "../game/state/tile_map";
-import { makeRectangle, makeVector, scaleRectangle, scaleVector, subtractVector, translateRectangle } from "../types/type_constructors";
+import { Tile, TileMapManager } from "../game/logic/tile_map_manager";
+import { rectangleMake, vectorMake, rectangleScale, vectorScale, vectorSubtract, rectangleTranslate } from "../types/type_constructors";
 import type { Rectangle, Vector } from "../types/types";
 import { GameCamera } from "./game_camera";
-import { CountryManager } from "../game/state/country_manager";
+import { CountryManager } from "../game/logic/country_manager";
 import { mousePositionManager } from "./mouse_position";
-import { TroopManager } from "../game/state/troop_manager";
-import { GameMapManager } from "../game/state/tick/game_map_manager";
+import { TroopManager } from "../game/logic/troop_manager";
+import { MapModeManager } from "./map_mode_manager";
 import { addRgbValue } from "../types/rgb";
 
 export type RenderOrder = { texture: string, target: Rectangle, layer: number, color: string | null, alpha: number, blend: string }
@@ -70,7 +70,7 @@ export class RenderLogicManager {
         const start_y: number = start_point.y;
         const end_x: number = end_point.x;
         const end_y: number = end_point.y;
-        const map_mode: string = GameMapManager.getMapMode();
+        const map_mode: string = MapModeManager.getMapMode();
         
         const incrementation: number = this.tile_detail;
         let owner_renders: RenderOrder[] = [];
@@ -108,7 +108,7 @@ export class RenderLogicManager {
         start_x = Math.floor(start_x / this.tile_detail) * this.tile_detail;
         start_y = Math.floor(start_y / this.tile_detail) * this.tile_detail;
 
-        return makeVector(start_x, start_y);
+        return vectorMake(start_x, start_y);
     }
 
     private static getEndRenderPoint(margin: number): Vector {
@@ -120,7 +120,7 @@ export class RenderLogicManager {
         const end_x: number = Math.min(map_width, max_x + 1);
         const end_y: number = Math.min(map_height, max_y + 1);
 
-        return makeVector(end_x, end_y);
+        return vectorMake(end_x, end_y);
     }
 
     private static renderOwnerIf(x: number, y: number): RenderOrder | null {
@@ -162,7 +162,7 @@ export class RenderLogicManager {
     }
 
     private static renderTroopIf(x: number, y: number): RenderOrder | null {
-        const tile_has_troops: boolean = TroopManager.tileHasTroops(makeVector(x, y));
+        const tile_has_troops: boolean = TroopManager.tileHasTroops(vectorMake(x, y));
         if (tile_has_troops) {
             return this.getTroopRender(x, y);
         } else {
@@ -171,7 +171,7 @@ export class RenderLogicManager {
     }
 
     private static renderTroopSelectionIf(x: number, y: number): RenderOrder | null {
-        const troops_on_tile: string[] = TroopManager.getTroopsOnTile(makeVector(x, y));
+        const troops_on_tile: string[] = TroopManager.getTroopsOnTile(vectorMake(x, y));
         const tile_has_selected_troop: boolean = troops_on_tile.some((tag) => {
             return TroopManager.getSelectedTroops().includes(tag);
         });
@@ -218,7 +218,7 @@ export class RenderLogicManager {
         const tile: Tile = TileMapManager.readTile(x, y);
         const terrain_label: string = tile.getTerrain();
         const base_texture: string = TextureManager.getTerrainBase(terrain_label);
-        const pos: Vector = makeVector(x, y);
+        const pos: Vector = vectorMake(x, y);
         const terrain_render: RenderOrder = this.renderOnTileGrid(base_texture, pos, 7 * y);
         return terrain_render;
     }
@@ -227,7 +227,7 @@ export class RenderLogicManager {
         const tile: Tile = TileMapManager.readTile(x, y);
         const terrain_label: string = tile.getTerrain();
         const detail_texture: string = TextureManager.getTerrainDetail(terrain_label);
-        const pos: Vector = makeVector(x, y);
+        const pos: Vector = vectorMake(x, y);
         let depth: number;
         if (terrain_label === "mountain") {
             depth = 7 * y + 1;
@@ -248,8 +248,8 @@ export class RenderLogicManager {
             console.error("no owner tag on tile", x, y);
             owner_colour = "rgb(0, 0, 0)";
         }
-        const pos: Vector = makeVector(x, y);
-        const non_offset: Vector = makeVector(0, 0);
+        const pos: Vector = vectorMake(x, y);
+        const non_offset: Vector = vectorMake(0, 0);
         const alpha: number = 1.0;
         const owner_render: RenderOrder = this.renderOnTileGrid("hexagon_blank", pos, 7 * y + 2, non_offset, owner_colour, alpha);
         return owner_render;
@@ -265,8 +265,8 @@ export class RenderLogicManager {
             console.error("no owner tag on tile", x, y);
             owner_colour = "rgb(0, 0, 0)";
         }
-        const pos: Vector = makeVector(x, y);
-        const non_offset: Vector = makeVector(0, 0);
+        const pos: Vector = vectorMake(x, y);
+        const non_offset: Vector = vectorMake(0, 0);
         let alpha: number;
         if (this.tile_detail !== 1 || TileMapManager.isBorder(pos)) {
             owner_colour = addRgbValue(owner_colour, "RGB(-33, -33, -33)");
@@ -289,34 +289,34 @@ export class RenderLogicManager {
             console.error("no controller tag on tile", x, y);
             controller_colour = 'rgb(0, 0, 0)';
         }
-        const pos: Vector = makeVector(x, y);
-        const non_offset: Vector = makeVector(0, 0);
+        const pos: Vector = vectorMake(x, y);
+        const non_offset: Vector = vectorMake(0, 0);
         const controller_render: RenderOrder = this.renderOnTileGrid("hexagon_striped", pos, 7 * y + 3, non_offset, controller_colour);
         return controller_render;
     }
 
     private static getTroopRender(x: number, y: number): RenderOrder {
-        const pos: Vector = makeVector(x, y);
+        const pos: Vector = vectorMake(x, y);
         const troop_render: RenderOrder = this.renderOnTileGrid('troop', pos, 7 * y + 5);
         return troop_render;
     }
 
     private static getSelectedTroopRender(x: number, y: number): RenderOrder {
-        const pos: Vector = makeVector(x, y);
+        const pos: Vector = vectorMake(x, y);
         const troop_render: RenderOrder = this.renderOnTileGrid('selection_troop', pos, 7 * y + 5);
         return troop_render;
     }
 
     private static getTileSelectionRender(x: number, y: number): RenderOrder {
-        const pos: Vector = makeVector(x, y);
-        const non_offset: Vector = makeVector(0, 0);
+        const pos: Vector = vectorMake(x, y);
+        const non_offset: Vector = vectorMake(0, 0);
         const tile_selection_render: RenderOrder = this.renderOnTileGrid('selection_outline', pos, 7 * y + 6, non_offset, "RGB(255, 255, 0)");
         return tile_selection_render;
     }
 
     private static getSelectedTileRender(x: number, y: number): RenderOrder {
-        let pos: Vector = makeVector(x, y);
-        const non_offset: Vector = makeVector(0, 0);
+        let pos: Vector = vectorMake(x, y);
+        const non_offset: Vector = vectorMake(0, 0);
         const selected_tile_render: RenderOrder = this.renderOnTileGrid('selection_outline_thick', pos, 7 * y + 6, non_offset, "RGB(255, 255, 0)");
         return selected_tile_render;
     }
@@ -328,10 +328,10 @@ export class RenderLogicManager {
      * @param offset optional Vector representing how much to offset the render in (x, y)
      * @returns RenderOrder representing the texture as a tile on a map grid
      */
-    private static renderOnTileGrid(texture: string, position: Vector, layer: number, offset = makeVector(0, 0),
+    private static renderOnTileGrid(texture: string, position: Vector, layer: number, offset = vectorMake(0, 0),
                                     color: string | null = null, alpha: number = 1, blend: string = "normal") {
         const tile_dimension: Rectangle = TextureManager.getSpriteDimensions("hexagon_blank");
-        const tile_size: Vector = makeVector(tile_dimension.width, tile_dimension.height);
+        const tile_size: Vector = vectorMake(tile_dimension.width, tile_dimension.height);
         return this.renderOnGrid(tile_size, position, texture, offset, layer, color, alpha, blend);
     }
 
@@ -360,14 +360,14 @@ export class RenderLogicManager {
         const even_layer = grid_pos_y % (2 * this.tile_detail) === 0;
 
         if (even_layer) {
-            target_dimensions = makeRectangle(
+            target_dimensions = rectangleMake(
                 start_x,
                 start_y * 0.75 - scaled_height,
                 start_x + tile_dimension.x * this.tile_detail,
                 start_y * 0.75 + (this.tile_detail - 1) * scaled_height
             );
         } else {
-            target_dimensions = makeRectangle(
+            target_dimensions = rectangleMake(
                 start_x + 0.5 * tile_dimension.x * this.tile_detail,
                 start_y * 0.75 - scaled_height,
                 start_x + 1.5 * tile_dimension.x * this.tile_detail,
@@ -410,7 +410,7 @@ export class RenderLogicManager {
         // zoom and offset base tile dimensions
         tile_dimension = zoomAndOffsetRectangle(tile_dimension);
         // offset pixel by subtracting tile dimension position from it
-        pixel = subtractVector(pixel, tile_dimension.position);
+        pixel = vectorSubtract(pixel, tile_dimension.position);
         // get grid_y dividing pixel.y with tile dimensions height times 0.5
         const grid_y: number = Math.floor(pixel.y / (tile_dimension.height * 0.75));
         // iff odd grid_y, offset pixel.x by - 0.5 * tile_dimension width
@@ -420,9 +420,9 @@ export class RenderLogicManager {
         // get grid_x dividing pixel.x with tile dimensions width
         const grid_x: number = Math.floor(pixel.x / tile_dimension.width);
         // calculated position is vector of (grid_x, grid_y)
-        let grid_position: Vector = makeVector(grid_x, grid_y);
+        let grid_position: Vector = vectorMake(grid_x, grid_y);
         // multiply by detail
-        grid_position = scaleVector(grid_position, getRenderDetail());
+        grid_position = vectorScale(grid_position, getRenderDetail());
         // if valid position, return vector of grid_x, grid_y
         if (TileMapManager.positionExists(grid_position)) {
             return grid_position;
@@ -440,7 +440,7 @@ export class RenderLogicManager {
         const canvas_size: Vector = getScreenDimensions();
         const canvas_x: number = canvas_size.x;
         const canvas_y: number = canvas_size.y;
-        const canvas_rectangle: Rectangle = makeRectangle(0, 0, canvas_x, canvas_y);
+        const canvas_rectangle: Rectangle = rectangleMake(0, 0, canvas_x, canvas_y);
         const screen_bounds: Rectangle = antiZoomAndOffsetRectangle(canvas_rectangle);
 
         const screen_start_x: number = screen_bounds.position.x;
@@ -453,7 +453,7 @@ export class RenderLogicManager {
         const tile_x: number = Math.floor(screen_start_x / tile_width);
         const tile_y: number = Math.floor(screen_start_y / tile_height);
 
-        return makeVector(tile_x, tile_y);
+        return vectorMake(tile_x, tile_y);
     }
 
     /**
@@ -465,7 +465,7 @@ export class RenderLogicManager {
         const canvas_size: Vector = getScreenDimensions();
         const canvas_x: number = canvas_size.x;
         const canvas_y: number = canvas_size.y;
-        const canvas_rectangle: Rectangle = makeRectangle(0, 0, canvas_x, canvas_y);
+        const canvas_rectangle: Rectangle = rectangleMake(0, 0, canvas_x, canvas_y);
         const screen_bounds: Rectangle = antiZoomAndOffsetRectangle(canvas_rectangle);
 
         const screen_end_x: number = screen_bounds.position.x + screen_bounds.width;
@@ -478,7 +478,7 @@ export class RenderLogicManager {
         const tile_x: number = Math.ceil(screen_end_x / tile_width);
         const tile_y: number = Math.ceil(screen_end_y / tile_height);
 
-        return makeVector(tile_x, tile_y);
+        return vectorMake(tile_x, tile_y);
     }
 }
 
@@ -500,7 +500,7 @@ function zoomAndOffsetRender(render_order: RenderOrder): RenderOrder {
 function zoomAndOffsetRectangle(rectangle: Rectangle): Rectangle {
     function offset(rect: Rectangle): Rectangle {
         const camera: Vector = GameCamera.getPos();
-        rect = translateRectangle(rect, -camera.x, -camera.y);
+        rect = rectangleTranslate(rect, -camera.x, -camera.y);
         return rect;
     }
 
@@ -525,7 +525,7 @@ function zoomAndOffsetRectangle(rectangle: Rectangle): Rectangle {
 function antiZoomAndOffsetRectangle(rectangle: Rectangle): Rectangle {
     function unoffset(rect: Rectangle): Rectangle {
         const camera: Vector = GameCamera.getPos();
-        rect = translateRectangle(rect, camera.x, camera.y);
+        rect = rectangleTranslate(rect, camera.x, camera.y);
         return rect;
     }
 
@@ -550,11 +550,11 @@ function antiZoomAndOffsetRectangle(rectangle: Rectangle): Rectangle {
  */
 function scaleByFocalPoint(rectangle: Rectangle, focal_point: Vector, factor: number): Rectangle {
     // shift shape such that focal point is on origin (0, 0)
-    let scaled_rectangle: Rectangle = translateRectangle(rectangle, -focal_point.x, -focal_point.y);
+    let scaled_rectangle: Rectangle = rectangleTranslate(rectangle, -focal_point.x, -focal_point.y);
     // scale the shifted shape, effectively around origin (0, 0)
-    scaled_rectangle = scaleRectangle(scaled_rectangle, factor);
+    scaled_rectangle = rectangleScale(scaled_rectangle, factor);
     // shift back such that focal point is on its original coordinates
-    scaled_rectangle = translateRectangle(scaled_rectangle, focal_point.x, focal_point.y);
+    scaled_rectangle = rectangleTranslate(scaled_rectangle, focal_point.x, focal_point.y);
     // return the scaled shapes
     return scaled_rectangle;
 }
@@ -604,9 +604,9 @@ function getScreenCentre(): Vector {
     const screen_dimensions: Vector = getScreenDimensions();
     const x_centre: number = Math.round(screen_dimensions.x / 2);
     const y_centre: number = Math.round(screen_dimensions.y / 2);
-    return makeVector(x_centre, y_centre);
+    return vectorMake(x_centre, y_centre);
 }
 
 function getScreenDimensions(): Vector {
-    return makeVector(window.innerWidth, window.innerHeight);
+    return vectorMake(window.innerWidth, window.innerHeight);
 }

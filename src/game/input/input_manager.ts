@@ -4,15 +4,21 @@
  * to it.
  */
 import type { Vector } from "../../types/types";
-import { makeVector } from "../../types/type_constructors";
+import { vectorMake, vectorEquals } from "../../types/type_constructors";
 import { GameCamera } from "../../render/game_camera";
-import { TileMapManager } from "../state/tile_map";
-import { TroopManager } from "../state/troop_manager";
-import { GameMapManager } from "../state/tick/game_map_manager";
+import { TileMapManager } from "../logic/tile_map_manager";
+import { TroopManager } from "../logic/troop_manager";
+import { MapModeManager } from "../../render/map_mode_manager";
+import { RenderLogicManager } from "../../render/render_logic_manager";
+import { InputEventInitializer } from "./input_event_initializer";
 
 export class InputManager {
     private static active_keys: Set<string> = new Set();
-    private static mouse_pos: Vector = makeVector(0, 0);
+    private static mouse_pos: Vector = vectorMake(0, 0);
+
+    public static init(): void {
+        InputEventInitializer.init();
+    }
 
     static addKey(key: string): void {
         this.active_keys.add(key);
@@ -66,7 +72,7 @@ export class InputManager {
                 Inputs.deselect();
                 break;
             case "m":
-                Inputs.stepMapMode();
+                Inputs.cycleMapMode();
         }
     }
 
@@ -80,7 +86,7 @@ export class InputManager {
                     break;
                 } else {
                     // left click
-                    Inputs.pressTile();
+                    Inputs.select();
                 }
             break;
             case "2":
@@ -121,8 +127,18 @@ class Inputs {
         GameCamera.zoomOut();
     }
 
-    static pressTile(): void {
-        TileMapManager.selectMouseTile();
+    static select(): void {
+        const tile_on_mouse: Vector | null = RenderLogicManager.tileOnMouse();
+        const selected_tile: Vector | null = TileMapManager.getSelectedTile();
+
+        if (tile_on_mouse && selected_tile && vectorEquals(tile_on_mouse, selected_tile)) { // pressed selected tile
+            const troops: string[] = TroopManager.getTroopsOnTile(selected_tile);
+            troops.forEach(troop => TroopManager.selectTroop(troop));
+            TileMapManager.unselectTile();
+        } else {
+            TroopManager.unselectAllTroops();
+            TileMapManager.setSelectedTile(tile_on_mouse);
+        }
     }
 
     static moveTroops(): void {
@@ -130,7 +146,6 @@ class Inputs {
     }
 
     static enqueueMoveTroops(): void {
-        console.log("enqueueing movement");
         TroopManager.enqueueMoveTroopsToMouse();
     }
 
@@ -139,7 +154,7 @@ class Inputs {
         TroopManager.unselectAllTroops();
     }
 
-    static stepMapMode(): void {
-        GameMapManager.stepMapMode();
+    static cycleMapMode(): void {
+        MapModeManager.stepMapMode();
     }
 }

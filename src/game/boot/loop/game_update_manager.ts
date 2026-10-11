@@ -3,15 +3,13 @@
  */
 
 import { RenderManager } from "../../../render/render_manager";
-import { GameMapManager } from "./game_map_manager";
-import { InputManager } from "../../inputs/input_manager";
+import { InputManager } from "../../input/input_manager";
 import { mousePositionManager } from "../../../render/mouse_position";
-import { TroopManager } from "../troop_manager";
+import { TroopManager } from "../../logic/troop_manager";
 
-export class GameStateManager {
+export class GameUpdateManager {
     static async update(delta_time: number) {
         InputManager.updateKeyAction(delta_time);
-        GameMapManager.update(delta_time);
         TroopManager.update(delta_time);
         mousePositionManager.update();
         RenderManager.update();

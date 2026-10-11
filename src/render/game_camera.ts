@@ -3,13 +3,13 @@
  * well as how zoomed in it is.
  */
 import type { Vector } from "../types/types";
-import { makeVector } from "../types/type_constructors";
+import { vectorMake } from "../types/type_constructors";
 
 export class GameCamera {
-    private static pos: Vector = makeVector(0, 0);
+    private static pos: Vector = vectorMake(0, 0);
     static getPos(): Vector { return this.pos }
     static incrementPos(x: number, y: number): void {
-        this.pos = makeVector(this.pos.x + x, this.pos.y + y)
+        this.pos = vectorMake(this.pos.x + x, this.pos.y + y)
     }
     static getZoom(): number { return ZoomManager.getZoom() }
     static getZoomLevel(): number { return ZoomManager.getZoomLevel() }

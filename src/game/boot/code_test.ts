@@ -3,7 +3,7 @@
  */
 
 import { hexagonsTests } from "../../types/hexagons";
-import { testTileMapManager } from "../state/tile_map";
+import { testTileMapManager } from "../logic/tile_map_manager_tests";
 
 export function codeTest(): void {
     const tile_map_manager_passed: boolean = testTileMapManager();

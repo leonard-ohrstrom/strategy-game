@@ -1,6 +1,6 @@
-import { TroopManager } from "../game/state/troop_manager";
-import { Tile, TileMapManager } from "../game/state/tile_map";
-import { makeVector } from "../types/type_constructors";
+import { TroopManager } from "../game/logic/troop_manager";
+import { Tile, TileMapManager } from "../game/logic/tile_map_manager";
+import { vectorMake } from "../types/type_constructors";
 import type { Vector } from "../types/types";
 
 function getElement(id: string): HTMLInputElement {
@@ -19,7 +19,7 @@ function applyGodMenu() {
             TileMapManager.setTerrain(tile_x, tile_y, input);
             break;
         case "troop_add":
-            TroopManager.createTroop(makeVector(tile_x, tile_y), input);
+            TroopManager.createTroop(vectorMake(tile_x, tile_y), input);
             break;
         case "troop_remove":
             TroopManager.deleteTroop(input);
@@ -32,7 +32,7 @@ function applyGodMenu() {
             console.log(tile);
             break;
         case "read_tile_troops":
-            const troops: string[] = TroopManager.getTroopsOnTile(makeVector(tile_x, tile_y));
+            const troops: string[] = TroopManager.getTroopsOnTile(vectorMake(tile_x, tile_y));
             console.log(troops);
             break;
         default:

@@ -1,5 +1,5 @@
 import { readJSON } from "../types/file_parser";
-import { makeRectangle } from "../types/type_constructors";
+import { rectangleMake } from "../types/type_constructors";
 import type { Rectangle } from "../types/types";
 
 // Terminology confusing because of overlap with PixiJS. Consider changing "sprite" to "subsheet" or other term.
@@ -138,7 +138,7 @@ export class TextureManager {
         x0 -= x0;
 
         // make Rectangle
-        return makeRectangle(x0, y0, x1, y1);
+        return rectangleMake(x0, y0, x1, y1);
     }
 
     public static getTerrainBase(terrain: string): string {

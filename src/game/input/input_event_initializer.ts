@@ -2,23 +2,25 @@
  * Detects keyboard inputs and mouse movement, and sends corresponding
  * information forward to InputManager.
  */
-import { makeVector } from "../../types/type_constructors";
+import { vectorMake } from "../../types/type_constructors";
 import { InputManager } from "./input_manager";
 
-export class InputEventManager {
+export class InputEventInitializer {
     static canvas: HTMLCanvasElement | undefined = undefined;
 
-    static init(): void {
+    public static init(): void {
         this.canvas = document.querySelector("canvas") as HTMLCanvasElement;
 
         if (this.canvas) {
             this.setEventListeners();
+        } else {
+            console.warn("no canvas, not setting event listener!")
         }
     }
 
-    static setEventListeners(): void {
+    private static setEventListeners(): void {
         if (!this.canvas) {
-            console.warn("no event listener");
+            console.warn("no canvas, aborting event listener!");
             return;
         }
 
@@ -35,7 +37,7 @@ export class InputEventManager {
 
         // mouse moved
         onmousemove = (event) => {
-            InputManager.setMousePos(makeVector(event.pageX, event.pageY));
+            InputManager.setMousePos(vectorMake(event.pageX, event.pageY));
         }
 
         // mouse key pressed

@@ -2,7 +2,7 @@
 // npx tsx src/types/hexagons.ts
 //
 
-import { makeVector } from "./type_constructors";
+import { vectorMake } from "./type_constructors";
 import type { Vector } from "./types";
 
 /**
@@ -74,7 +74,7 @@ export function hexVectorOffsetToDouble(offset_coordinate: Vector): Vector {
     const y: number = offset_coordinate.y;
     const offset: number = y % 2;
 
-    return makeVector(x * 2 + offset, y);
+    return vectorMake(x * 2 + offset, y);
 }
 
 /**
@@ -86,7 +86,7 @@ export function hexVectorDoubleToOffset(double_coordinate: Vector): Vector {
     const x: number = double_coordinate.x;
     const y: number = double_coordinate.y;
 
-    return makeVector(Math.floor(x / 2), y);
+    return vectorMake(Math.floor(x / 2), y);
 }
 
 /**
@@ -127,7 +127,7 @@ export function hexagonsTests(): boolean {
     //
     // coordinate offset --> double --> offset
     //
-    const coordinate_offset_1: Vector = makeVector(5, 3);
+    const coordinate_offset_1: Vector = vectorMake(5, 3);
     const coordinate_doubled_1: Vector = hexVectorOffsetToDouble(coordinate_offset_1);
     const coordinate_result_1: Vector = hexVectorDoubleToOffset(coordinate_doubled_1);
 
