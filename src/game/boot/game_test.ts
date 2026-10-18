@@ -4,8 +4,8 @@
 
 import { RenderManager } from "../../render/render_manager";
 import { TextureManager } from "../../render/texture_manager";
-import { vectorMake } from "../../types/type_constructors";
-import type { Vector } from "../../types/types";
+import { vectorMake } from "../../utils/type_constructors";
+import type { Vector } from "../../utils/types";
 import { InputEventInitializer } from "../input/input_event_initializer";
 import { CountryManager } from "../logic/country_manager";
 import { TileMapManager } from "../logic/tile_map_manager";

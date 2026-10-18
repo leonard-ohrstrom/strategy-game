@@ -1,6 +1,6 @@
-import { readJSON } from "../types/file_parser";
-import { rectangleMake } from "../types/type_constructors";
-import type { Rectangle } from "../types/types";
+import { readJSON } from "../utils/disk_interaction";
+import { rectangleMake } from "../utils/type_constructors";
+import type { Rectangle } from "../utils/types";
 
 // Terminology confusing because of overlap with PixiJS. Consider changing "sprite" to "subsheet" or other term.
 

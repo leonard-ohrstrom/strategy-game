@@ -2,7 +2,7 @@
  * Detects keyboard inputs and mouse movement, and sends corresponding
  * information forward to InputManager.
  */
-import { vectorMake } from "../../types/type_constructors";
+import { vectorMake } from "../../utils/type_constructors";
 import { InputManager } from "./input_manager";
 
 export class InputEventInitializer {

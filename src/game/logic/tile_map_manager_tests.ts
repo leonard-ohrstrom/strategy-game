@@ -1,4 +1,4 @@
-import { vectorMake } from "../../types/type_constructors";
+import { vectorMake } from "../../utils/type_constructors";
 import { TileMapManager } from "./tile_map_manager";
 
 /**
@@ -7,7 +7,7 @@ import { TileMapManager } from "./tile_map_manager";
  */
 export function testTileMapManager(): boolean {
     console.log("--- tileMapManager tests ---")
-    TileMapManager.makeGrid(7, 3);
+    TileMapManager.makeGrid(7, 3, "plain");
 
     function correctDimensions(): boolean {
         const correct_width: boolean = TileMapManager.readWidth() === 7;

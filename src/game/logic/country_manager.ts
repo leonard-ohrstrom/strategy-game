@@ -1,7 +1,7 @@
 /**
  * Manages each concrete instance of a country.
  */
-import { loadConfig } from "../../types/file_parser";
+import { loadConfig } from "../../utils/disk_interaction";
 
 type Country = {
     tag: string,

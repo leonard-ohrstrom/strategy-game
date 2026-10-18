@@ -7,7 +7,7 @@ import { startTicker } from "./loop/ticker";
 import { RenderManager } from "../../render/render_manager";
 import { CountryManager } from "../logic/country_manager";
 import { GameCamera } from "../../render/game_camera";
-import { vectorMake } from "../../types/type_constructors";
+import { vectorMake } from "../../utils/type_constructors";
 import { InputManager } from "../input/input_manager";
 
 async function buildMap(): Promise<void> {

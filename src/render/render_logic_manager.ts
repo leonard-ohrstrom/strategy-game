@@ -4,14 +4,14 @@
  */
 import { TextureManager } from "./texture_manager";
 import { Tile, TileMapManager } from "../game/logic/tile_map_manager";
-import { rectangleMake, vectorMake, rectangleScale, vectorScale, vectorSubtract, rectangleTranslate } from "../types/type_constructors";
-import type { Rectangle, Vector } from "../types/types";
+import { rectangleMake, vectorMake, rectangleScale, vectorScale, vectorSubtract, rectangleTranslate } from "../utils/type_constructors";
+import type { Rectangle, Vector } from "../utils/types";
 import { GameCamera } from "./game_camera";
 import { CountryManager } from "../game/logic/country_manager";
 import { mousePositionManager } from "./mouse_position";
 import { TroopManager } from "../game/logic/troop_manager";
 import { MapModeManager } from "./map_mode_manager";
-import { addRgbValue } from "../types/rgb";
+import { addRgbValue } from "../utils/rgb";
 
 export type RenderOrder = { texture: string, target: Rectangle, layer: number, color: string | null, alpha: number, blend: string }
 type TileRender_Func = (x: number, y: number) => RenderOrder | null

@@ -1,5 +1,5 @@
 import { Application, Assets, Rectangle as pixiRectangle, Sprite, Texture, TextureSource } from "pixi.js";
-import type { Rectangle } from "../types/types";
+import type { Rectangle } from "../utils/types";
 import { RenderLogicManager, type RenderOrder } from "./render_logic_manager";
 import { TextureManager, type Boundaries } from "./texture_manager";
 

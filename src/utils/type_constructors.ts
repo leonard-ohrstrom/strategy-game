@@ -56,8 +56,7 @@ export function vectorToString(vector: Vector): string {
     return `(${vector.x}, ${vector.y})`;
 }
 
-export function vectorFromString(vector_string: string): Vector
-{
+export function vectorFromString(vector_string: string): Vector {
     const i_opening_parentheses: number = vector_string.indexOf("(");
     const i_comma: number = vector_string.indexOf(",", i_opening_parentheses + 1);
     const i_closing_parentheses: number = vector_string.indexOf(")", i_comma + 1);

@@ -3,14 +3,11 @@
  * perform appropriate action if any input or mouse position has an effect tied
  * to it.
  */
-import type { Vector } from "../../types/types";
-import { vectorMake, vectorEquals } from "../../types/type_constructors";
+import type { Vector } from "../../utils/types";
+import { vectorMake } from "../../utils/type_constructors";
 import { GameCamera } from "../../render/game_camera";
-import { TileMapManager } from "../logic/tile_map_manager";
-import { TroopManager } from "../logic/troop_manager";
-import { MapModeManager } from "../../render/map_mode_manager";
-import { RenderLogicManager } from "../../render/render_logic_manager";
 import { InputEventInitializer } from "./input_event_initializer";
+import { InputActionManager } from "./input_action_manager";
 
 export class InputManager {
     private static active_keys: Set<string> = new Set();
@@ -44,35 +41,35 @@ export class InputManager {
         const factor: number = delta_time / GameCamera.getZoom();
 
         if (this.keyDown("arrowup")) {
-            Inputs.cameraUp(factor);
+            InputActionManager.cameraUp(factor);
         }
 
         if (this.keyDown("arrowdown")) {
-            Inputs.cameraDown(factor);
+            InputActionManager.cameraDown(factor);
         }
 
         if (this.keyDown("arrowleft")) {
-            Inputs.cameraLeft(factor);
+            InputActionManager.cameraLeft(factor);
         }
 
         if (this.keyDown("arrowright")) {
-            Inputs.cameraRight(factor);
+            InputActionManager.cameraRight(factor);
         }
     }
 
     static pressedKey(key: string): void {
         switch(key) {
             case "+":
-                Inputs.cameraZoomIn();
+                InputActionManager.cameraZoomIn();
                 break;
             case "-":
-                Inputs.cameraZoomOut();
+                InputActionManager.cameraZoomOut();
                 break;
             case "escape":
-                Inputs.deselect();
+                InputActionManager.deselect();
                 break;
             case "m":
-                Inputs.cycleMapMode();
+                InputActionManager.cycleMapMode();
         }
     }
 
@@ -86,75 +83,18 @@ export class InputManager {
                     break;
                 } else {
                     // left click
-                    Inputs.select();
+                    InputActionManager.select();
                 }
             break;
             case "2":
                 if (this.keyDown("control")) {
                     // control right click
-                    Inputs.enqueueMoveTroops();
+                    InputActionManager.enqueueMoveTroops();
                 } else {
                     // right mouse button
-                    Inputs.moveTroops();
+                    InputActionManager.moveTroops();
                 }
             break;
         }
-    }
-}
-
-class Inputs {
-    static cameraUp(factor: number): void {
-        GameCamera.incrementPos(0, -factor);
-    }
-
-    static cameraDown(factor: number): void {
-        GameCamera.incrementPos(0, factor);
-    }
-
-    static cameraLeft(factor: number): void {
-        GameCamera.incrementPos(-factor, 0);
-    }
-
-    static cameraRight(factor: number): void {
-        GameCamera.incrementPos(factor, 0);
-    }
-
-    static cameraZoomIn(): void {
-        GameCamera.zoomIn();
-    }
-
-    static cameraZoomOut(): void {
-        GameCamera.zoomOut();
-    }
-
-    static select(): void {
-        const tile_on_mouse: Vector | null = RenderLogicManager.tileOnMouse();
-        const selected_tile: Vector | null = TileMapManager.getSelectedTile();
-
-        if (tile_on_mouse && selected_tile && vectorEquals(tile_on_mouse, selected_tile)) { // pressed selected tile
-            const troops: string[] = TroopManager.getTroopsOnTile(selected_tile);
-            troops.forEach(troop => TroopManager.selectTroop(troop));
-            TileMapManager.unselectTile();
-        } else {
-            TroopManager.unselectAllTroops();
-            TileMapManager.setSelectedTile(tile_on_mouse);
-        }
-    }
-
-    static moveTroops(): void {
-        TroopManager.moveTroopsToMouse();
-    }
-
-    static enqueueMoveTroops(): void {
-        TroopManager.enqueueMoveTroopsToMouse();
-    }
-
-    static deselect(): void {
-        TileMapManager.unselectTile();
-        TroopManager.unselectAllTroops();
-    }
-
-    static cycleMapMode(): void {
-        MapModeManager.stepMapMode();
     }
 }

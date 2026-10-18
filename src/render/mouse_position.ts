@@ -2,8 +2,8 @@
  * For calculating which pixel on game screen mouse is. (i.e., canvas but taking into account camera
  * zoom and position.) Borderline belongs in /inputs/ because of overlap in functionality.
  */
-import { vectorMake } from "../types/type_constructors";
-import type { Vector } from "../types/types";
+import { vectorMake } from "../utils/type_constructors";
+import type { Vector } from "../utils/types";
 import { InputManager } from "../game/input/input_manager";
 
 export class mousePositionManager {

@@ -1,10 +1,10 @@
 // npx tsx src/map/generator/map_generator_img.ts
 
 import { writeFile } from "atomically";
-import { rectangleMake, vectorMake } from "../../types/type_constructors";
-import type { Rectangle, Vector } from "../../types/types";
+import { rectangleMake, vectorMake } from "../../utils/type_constructors";
+import type { Rectangle, Vector } from "../../utils/types";
 import sharp, { type OutputInfo } from "sharp";
-import { rgbNumbersToString, rgbStringToNumbers } from "../../types/rgb";
+import { rgbNumbersToString, rgbStringToNumbers } from "../../utils/rgb";
 
 type string_colour = string;
 type ColourAssociation = [string, string_colour];

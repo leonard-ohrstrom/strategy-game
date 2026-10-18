@@ -1,5 +1,5 @@
-import { vectorCopy, vectorDistance, vectorEquals, vectorFromString, vectorToString } from "../../types/type_constructors";
-import type { Vector } from "../../types/types";
+import { vectorCopy, vectorDistance, vectorEquals, vectorFromString, vectorToString } from "../../utils/type_constructors";
+import type { Vector } from "../../utils/types";
 import { Tile, TileMapManager } from "./tile_map_manager";
 
 class NodeLink {

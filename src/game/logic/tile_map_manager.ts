@@ -2,10 +2,10 @@
  * Stores data and allows reading of all tiles on the map.
  */
 import { RenderLogicManager } from "../../render/render_logic_manager";
-import { readJSON } from "../../types/file_parser";
-import { hexVectorDoubleToOffset, hexVectorOffsetToDouble } from "../../types/hexagons";
-import { vectorAdd, vectorMake, vectorEquals, vectorToString } from "../../types/type_constructors";
-import type { Vector } from "../../types/types";
+import { readJSON } from "../../utils/disk_interaction";
+import { hexVectorDoubleToOffset, hexVectorOffsetToDouble } from "../../utils/hexagons";
+import { vectorAdd, vectorMake, vectorEquals } from "../../utils/type_constructors";
+import type { Vector } from "../../utils/types";
 import { godMenuSelectTile } from "../../scripts/god_menu";
 import { CountryManager } from "./country_manager";
 import { TroopManager } from "./troop_manager";
@@ -97,8 +97,8 @@ export class TileMapManager {
     }
 
     public static async loadMapFile(): Promise<void> {
-        const terrain_grid: Array<Array<string>> = await readJSON("src/map_gen/output/map_geo.json");
-        const owner_grid: Array<Array<string>> = await readJSON("src/map_gen/output/map_pol.json");
+        const terrain_grid: Array<Array<string>> = await readJSON("src/map_data/output/map_geo.json");
+        const owner_grid: Array<Array<string>> = await readJSON("src/map_data/output/map_pol.json");
 
         const texture_grid_width: number = terrain_grid.length;
         const texture_grid_height: number = terrain_grid[0].length;

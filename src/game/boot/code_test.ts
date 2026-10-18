@@ -2,7 +2,7 @@
  * Tests to ensure code exhibits expected behaviour internally.
  */
 
-import { hexagonsTests } from "../../types/hexagons";
+import { hexagonsTests } from "../../utils/hexagons";
 import { testTileMapManager } from "../logic/tile_map_manager_tests";
 
 export function codeTest(): void {

@@ -2,8 +2,8 @@
  * Game camera for navigating map, keeps track of it's own position (x, y) as
  * well as how zoomed in it is.
  */
-import type { Vector } from "../types/types";
-import { vectorMake } from "../types/type_constructors";
+import type { Vector } from "../utils/types";
+import { vectorMake } from "../utils/type_constructors";
 
 export class GameCamera {
     private static pos: Vector = vectorMake(0, 0);

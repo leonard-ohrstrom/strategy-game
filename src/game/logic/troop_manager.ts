@@ -1,6 +1,6 @@
 import { RenderLogicManager } from "../../render/render_logic_manager";
-import { vectorEquals, vectorToString } from "../../types/type_constructors";
-import type { Vector } from "../../types/types";
+import { vectorEquals, vectorToString } from "../../utils/type_constructors";
+import type { Vector } from "../../utils/types";
 import { TroopMovementManager } from "./troop_movement_manager";
 import { TagManager } from "./troop_tag_manager";
 

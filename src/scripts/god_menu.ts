@@ -1,7 +1,7 @@
 import { TroopManager } from "../game/logic/troop_manager";
 import { Tile, TileMapManager } from "../game/logic/tile_map_manager";
-import { vectorMake } from "../types/type_constructors";
-import type { Vector } from "../types/types";
+import { vectorMake } from "../utils/type_constructors";
+import type { Vector } from "../utils/types";
 
 function getElement(id: string): HTMLInputElement {
     return document.getElementById(id) as HTMLInputElement;
