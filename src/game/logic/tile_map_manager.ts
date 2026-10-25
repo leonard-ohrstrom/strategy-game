@@ -97,8 +97,8 @@ export class TileMapManager {
     }
 
     public static async loadMapFile(): Promise<void> {
-        const terrain_grid: Array<Array<string>> = await readJSON("src/map_data/output/map_geo.json");
-        const owner_grid: Array<Array<string>> = await readJSON("src/map_data/output/map_pol.json");
+        const terrain_grid: Array<Array<string>> = await readJSON("src/map/map_data/map_geo.json");
+        const owner_grid: Array<Array<string>> = await readJSON("src/map/map_data/map_pol.json");
 
         const texture_grid_width: number = terrain_grid.length;
         const texture_grid_height: number = terrain_grid[0].length;
@@ -225,23 +225,6 @@ export class TileMapManager {
         return diff_owner_neighbours.length > 0;
     }
 
-    public static selectMouseTile(): void {
-        const tile_on_mouse: Vector | null = RenderLogicManager.tileOnMouse();
-
-        const pressed_selected_tile: boolean = vectorEquals(tile_on_mouse, this.selected_tile);
-
-        if (pressed_selected_tile) { // tile was already selected => unselect it, select troops
-            const troops_on_tile: string[] = TroopManager.getTroopsOnTile(this.selected_tile!); // selected tile already guaranteed non-null in bool double_select
-            this.unselectTile();
-            troops_on_tile.forEach((tag: string) => {
-                TroopManager.selectTroop(tag);
-            });
-        } else { // tile wasn't selected => select it
-            TroopManager.unselectAllTroops();
-            this.setSelectedTile(tile_on_mouse);
-        }
-    }
-
     /** *TileMapManager.setSelectedTile(null)* */
     public static unselectTile(): void {
         this.setSelectedTile(null);
@@ -250,13 +233,5 @@ export class TileMapManager {
     public static setSelectedTile(tile_pos: Vector | null): void {
         this.selected_tile = tile_pos;
         godMenuSelectTile(tile_pos ?? vectorMake(0, 0));
-    }
-
-    public static getSelectedTile(): Vector | null {
-        if (this.selected_tile) {
-            return { ...this.selected_tile };
-        } else {
-            return null;
-        }
     }
 }

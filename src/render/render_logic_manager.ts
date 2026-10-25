@@ -8,10 +8,10 @@ import { rectangleMake, vectorMake, rectangleScale, vectorScale, vectorSubtract,
 import type { Rectangle, Vector } from "../utils/types";
 import { GameCamera } from "./game_camera";
 import { CountryManager } from "../game/logic/country_manager";
-import { mousePositionManager } from "./mouse_position";
 import { TroopManager } from "../game/logic/troop_manager";
 import { MapModeManager } from "./map_mode_manager";
 import { addRgbValue } from "../utils/rgb";
+import { MapPlayerInteraction } from "../game/logic/map_player_interaction";
 
 export type RenderOrder = { texture: string, target: Rectangle, layer: number, color: string | null, alpha: number, blend: string }
 type TileRender_Func = (x: number, y: number) => RenderOrder | null
@@ -183,15 +183,15 @@ export class RenderLogicManager {
     }
 
     private static renderTileSelectionHover(): void {
-        const tile_selection: Vector | null = this.tileOnMouse();
-        if (tile_selection) {
-            const tile_selection_render: RenderOrder = this.getTileSelectionRender(tile_selection.x, tile_selection.y);
+        const hovered_tile: Vector | null = MapPlayerInteraction.getHoveredTile();
+        if (hovered_tile) {
+            const tile_selection_render: RenderOrder = this.getTileSelectionRender(hovered_tile.x, hovered_tile.y);
             this.pushToQueue(tile_selection_render);
         }
     }
 
     private static renderTileSelection(): void {
-        const selected_tile: Vector | null = TileMapManager.getSelectedTile();
+        const selected_tile: Vector | null = MapPlayerInteraction.getSelectedTile();
         if (selected_tile) {
             const selected_tile_render: RenderOrder = this.getSelectedTileRender(selected_tile.x, selected_tile.y);
             this.pushToQueue(selected_tile_render);
@@ -388,23 +388,11 @@ export class RenderLogicManager {
     }
 
     /**
-     * Calculates what tile the mouse is currently over,
-     * @param mouse_pos a mouse position on the canvas
-     * @returns a Vector representing what grid tile the given mouse position corresponds to,
-     * accounting for camera (does not ensure position actually exists on the map)
-     */
-    public static tileOnMouse(): Vector | null {
-        const mouse_pos: Vector = mousePositionManager.mousePos();
-        return this.tileOnPixel(mouse_pos);
-    }
-
-    /**
      * Calculates what tile is on a given pixel on the screen, accounting for camera.
-     * valid range.
      * @param pixel a pixel's position on the display represented as a Vector
      * @returns Vector representing the grid position of the tile which covers the given pixel
      */
-    private static tileOnPixel(pixel: Vector): Vector | null {
+    public static tileOnPixel(pixel: Vector): Vector | null {
         // get base tile dimensions
         let tile_dimension: Rectangle = this.getTerrainBaseRender(0, 0).target;
         // zoom and offset base tile dimensions

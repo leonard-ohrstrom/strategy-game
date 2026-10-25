@@ -7,26 +7,47 @@ import { vectorMake } from "../utils/type_constructors";
 
 export class GameCamera {
     private static pos: Vector = vectorMake(0, 0);
-    static getPos(): Vector { return this.pos }
+
+    static getPos(): Vector {
+        return this.pos;
+    }
+
     static incrementPos(x: number, y: number): void {
         this.pos = vectorMake(this.pos.x + x, this.pos.y + y)
     }
-    static getZoom(): number { return ZoomManager.getZoom() }
-    static getZoomLevel(): number { return ZoomManager.getZoomLevel() }
-    static setPos(pos: Vector) { this.pos = pos }
-    static zoomIn(): void { ZoomManager.zoomIn() }
-    static zoomOut(): void { ZoomManager.zoomOut() }
+
+    static getZoom(): number {
+        return ZoomManager.getZoom();
+    }
+
+    static getZoomLevel(): number {
+        return ZoomManager.getZoomLevel();
+    }
+
+    static setPos(pos: Vector) {
+        this.pos = pos;
+    }
+
+    static zoomIn(): void {
+        ZoomManager.zoomIn();
+    }
+    static zoomOut(): void {
+        ZoomManager.zoomOut();
+    }
 }
 
+/** Helper class for GameCamera class */
 class ZoomManager {
     private static zoom_level: number = 3;
     private static max_zoom_level: number = 1;
     private static min_zoom_level: number = 8;
 
+    /** Helper function, ensures input number is equal to or between min and max zoom */
     private static zoomBound(n: number): number {
         return Math.min(Math.max(this.max_zoom_level, n), this.min_zoom_level);
     }
 
+    /** How much rendering scales renders */
     public static getZoom(): number {
         switch(this.zoom_level) {
             case 8: return 1/128;
@@ -41,11 +62,16 @@ class ZoomManager {
         }
     }
 
+    /** Which "step" (1-8) of zooming in-out the camera is currently set to */
     public static getZoomLevel(): number {
         return this.zoom_level;
     }
 
-    public static zoomIn(): void { this.zoom_level = this.zoomBound(this.zoom_level - 1) }
-    public static zoomOut(): void { this.zoom_level = this.zoomBound(this.zoom_level + 1) }
-    public static setZoom(zoom: number): void {this.zoom_level = zoom}
+    public static zoomIn(): void {
+        this.zoom_level = this.zoomBound(this.zoom_level - 1);
+    }
+
+    public static zoomOut(): void {
+        this.zoom_level = this.zoomBound(this.zoom_level + 1);
+    }
 }

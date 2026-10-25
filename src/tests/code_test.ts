@@ -2,8 +2,8 @@
  * Tests to ensure code exhibits expected behaviour internally.
  */
 
-import { hexagonsTests } from "../../utils/hexagons";
-import { testTileMapManager } from "../logic/tile_map_manager_tests";
+import { hexagonsTests } from "../utils/hexagons";
+import { testTileMapManager } from "../game/logic/tile_map_manager_tests";
 
 export function codeTest(): void {
     const tile_map_manager_passed: boolean = testTileMapManager();

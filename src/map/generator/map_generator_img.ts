@@ -387,7 +387,7 @@ const geo_map_image_data: ImageData =
 };
 
 const geo_map = await generateMapFromImage(geo_map_image_data, 4, 2);
-await writeJSON(geo_map, 'src/map/output/map_geo.json');
+await writeJSON(geo_map, 'src/map/map_data/map_geo.json');
 console.log("geography map succesfully generated and written");
 
 const pol_map_image_data: ImageData =
@@ -399,5 +399,5 @@ const pol_map_image_data: ImageData =
 };
 
 const pol_map = await generateMapFromImage(pol_map_image_data, 4, 2);
-await writeJSON(pol_map, 'src/map/output/map_pol.json');
+await writeJSON(pol_map, 'src/map/map_data/map_pol.json');
 console.log("political map succesfully generated and written");
