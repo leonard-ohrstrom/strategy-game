@@ -1,6 +1,6 @@
 /**
  * Fetches information from other aspects of game to interpret and send to RenderManager as medium level abstraction
- * instructions of what to draw. Warning: here be spaghetti code
+ * instructions of what to draw.
  */
 import { TextureManager } from "./texture_manager";
 import { Tile, TileMapManager } from "../game/logic/tile_map_manager";
@@ -219,7 +219,7 @@ export class RenderLogicManager {
         const terrain_label: string = tile.getTerrain();
         const base_texture: string = TextureManager.getTerrainBase(terrain_label);
         const pos: Vector = vectorMake(x, y);
-        const terrain_render: RenderOrder = this.renderOnTileGrid(base_texture, pos, 7 * y);
+        const terrain_render: RenderOrder = this.renderOnHexGrid(base_texture, pos, 7 * y);
         return terrain_render;
     }
 
@@ -234,7 +234,7 @@ export class RenderLogicManager {
         } else {
             depth = 7 * y + 4;
         }
-        const terrain_render: RenderOrder = this.renderOnTileGrid(detail_texture, pos, depth);
+        const terrain_render: RenderOrder = this.renderOnHexGrid(detail_texture, pos, depth);
         return terrain_render;
     }
 
@@ -251,7 +251,7 @@ export class RenderLogicManager {
         const pos: Vector = vectorMake(x, y);
         const non_offset: Vector = vectorMake(0, 0);
         const alpha: number = 1.0;
-        const owner_render: RenderOrder = this.renderOnTileGrid("hexagon_blank", pos, 7 * y + 2, non_offset, owner_colour, alpha);
+        const owner_render: RenderOrder = this.renderOnHexGrid("hexagon_blank", pos, 7 * y + 2, non_offset, owner_colour, alpha);
         return owner_render;
     }
 
@@ -275,7 +275,7 @@ export class RenderLogicManager {
             alpha = 0.5;
         }
         let blend: string = "normal";
-        const owner_render: RenderOrder = this.renderOnTileGrid("hexagon_blank", pos, 7 * y + 2, non_offset, owner_colour, alpha, blend);
+        const owner_render: RenderOrder = this.renderOnHexGrid("hexagon_blank", pos, 7 * y + 2, non_offset, owner_colour, alpha, blend);
         return owner_render;
     }
 
@@ -291,44 +291,48 @@ export class RenderLogicManager {
         }
         const pos: Vector = vectorMake(x, y);
         const non_offset: Vector = vectorMake(0, 0);
-        const controller_render: RenderOrder = this.renderOnTileGrid("hexagon_striped", pos, 7 * y + 3, non_offset, controller_colour);
+        const controller_render: RenderOrder = this.renderOnHexGrid("hexagon_striped", pos, 7 * y + 3, non_offset, controller_colour);
         return controller_render;
     }
 
     private static getTroopRender(x: number, y: number): RenderOrder {
         const pos: Vector = vectorMake(x, y);
-        const troop_render: RenderOrder = this.renderOnTileGrid('troop', pos, 7 * y + 5);
+        const troop_render: RenderOrder = this.renderOnHexGrid('troop', pos, 7 * y + 5);
         return troop_render;
     }
 
     private static getSelectedTroopRender(x: number, y: number): RenderOrder {
         const pos: Vector = vectorMake(x, y);
-        const troop_render: RenderOrder = this.renderOnTileGrid('selection_troop', pos, 7 * y + 5);
+        const troop_render: RenderOrder = this.renderOnHexGrid('selection_troop', pos, 7 * y + 5);
         return troop_render;
     }
 
     private static getTileSelectionRender(x: number, y: number): RenderOrder {
         const pos: Vector = vectorMake(x, y);
         const non_offset: Vector = vectorMake(0, 0);
-        const tile_selection_render: RenderOrder = this.renderOnTileGrid('selection_outline', pos, 7 * y + 6, non_offset, "RGB(255, 255, 0)");
+        const tile_selection_render: RenderOrder = this.renderOnHexGrid('selection_outline', pos, 7 * y + 6, non_offset, "RGB(255, 255, 0)");
         return tile_selection_render;
     }
 
     private static getSelectedTileRender(x: number, y: number): RenderOrder {
         let pos: Vector = vectorMake(x, y);
         const non_offset: Vector = vectorMake(0, 0);
-        const selected_tile_render: RenderOrder = this.renderOnTileGrid('selection_outline_thick', pos, 7 * y + 6, non_offset, "RGB(255, 255, 0)");
+        const selected_tile_render: RenderOrder = this.renderOnHexGrid('selection_outline_thick', pos, 7 * y + 6, non_offset, "RGB(255, 255, 0)");
         return selected_tile_render;
     }
 
     /**
-     * Creates a render order for a texture to be rendered on map tile
+     * Creates a render order for a texture to be rendered as a tile on map hexagonal grid
      * @param texture A given texture to render
-     * @param position Vector representing which tile to render the texture on
-     * @param offset optional Vector representing how much to offset the render in (x, y)
+     * @param position Vector representing which tile on the grid is to be rendered
+     * @param layer What z-index to render the given tile on
+     * @param offset (optional) Vector representing how much to offset the render
+     * @param color (optional) colour to apply on tile
+     * @param alpha (optional) tile alpha (opacity)
+     * @param blend (optional) blend used for colour
      * @returns RenderOrder representing the texture as a tile on a map grid
      */
-    private static renderOnTileGrid(texture: string, position: Vector, layer: number, offset = vectorMake(0, 0),
+    private static renderOnHexGrid(texture: string, position: Vector, layer: number, offset = vectorMake(0, 0),
                                     color: string | null = null, alpha: number = 1, blend: string = "normal") {
         const tile_dimension: Rectangle = TextureManager.getSpriteDimensions("hexagon_blank");
         const tile_size: Vector = vectorMake(tile_dimension.width, tile_dimension.height);
@@ -336,12 +340,16 @@ export class RenderLogicManager {
     }
 
     /**
-     * Creates a render order for a texture as a tile in a grid
-     * @param tile_dimension Vector representing tile width and height of grid tiles
-     * @param position Vector representing which tile on the grid is to be rendered (x, y)
+     * Creates a render order for a texture as a tile in a hexagonal grid
+     * @param tile_dimension Vector representing tile width and height of tiles on the grid
+     * @param position Vector representing which tile on the grid is to be rendered
      * @param texture A given texture to render
-     * @param offset optional Vector representing how much to offset the render in (x, y)
-     * @returns RenderOrder representing the texture as a tile in the given grid
+     * @param offset (optional) Vector representing how much to offset the render
+     * @param layer What z-index to render the given tile on
+     * @param color (optional) colour to apply on tile
+     * @param alpha (optional) tile alpha (opacity)
+     * @param blend (optional) blend used for colour
+     * @returns RenderOrder representing the texture as a tile on the given grid
      */
     private static renderOnGrid(tile_dimension: Vector, position: Vector, texture: string, offset: Vector,
                                 layer: number, color: string | null, alpha: number, blend: string): RenderOrder {
@@ -395,23 +403,31 @@ export class RenderLogicManager {
     public static tileOnPixel(pixel: Vector): Vector | null {
         // get base tile dimensions
         let tile_dimension: Rectangle = this.getTerrainBaseRender(0, 0).target;
+    
         // zoom and offset base tile dimensions
         tile_dimension = zoomAndOffsetRectangle(tile_dimension);
+    
         // offset pixel by subtracting tile dimension position from it
         pixel = vectorSubtract(pixel, tile_dimension.position);
+    
         // get grid_y dividing pixel.y with tile dimensions height times 0.5
         const grid_y: number = Math.floor(pixel.y / (tile_dimension.height * 0.75));
-        // iff odd grid_y, offset pixel.x by - 0.5 * tile_dimension width
+    
+        // if odd grid_y, offset pixel.x by - 0.5 * tile_dimension width
         if (grid_y % 2 === 1) {
             pixel.x -= tile_dimension.width * 0.5;
         }
+    
         // get grid_x dividing pixel.x with tile dimensions width
         const grid_x: number = Math.floor(pixel.x / tile_dimension.width);
-        // calculated position is vector of (grid_x, grid_y)
+    
+        // make vector of calculated position (grid_x, grid_y)
         let grid_position: Vector = vectorMake(grid_x, grid_y);
+    
         // multiply by detail
         grid_position = vectorScale(grid_position, getRenderDetail());
-        // if valid position, return vector of grid_x, grid_y
+    
+        // if valid position/tile, return position
         if (TileMapManager.positionExists(grid_position)) {
             return grid_position;
         } else { // else return null

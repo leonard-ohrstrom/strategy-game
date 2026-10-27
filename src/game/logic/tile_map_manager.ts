@@ -1,14 +1,11 @@
 /**
  * Stores data and allows reading of all tiles on the map.
  */
-import { RenderLogicManager } from "../../render/render_logic_manager";
 import { readJSON } from "../../utils/disk_interaction";
 import { hexVectorDoubleToOffset, hexVectorOffsetToDouble } from "../../utils/hexagons";
 import { vectorAdd, vectorMake, vectorEquals } from "../../utils/type_constructors";
 import type { Vector } from "../../utils/types";
-import { godMenuSelectTile } from "../../scripts/god_menu";
 import { CountryManager } from "./country_manager";
-import { TroopManager } from "./troop_manager";
 
 export class Tile {
     private terrain: string;
@@ -80,7 +77,6 @@ export class TileMapManager {
     private static tile_grid: Array<Array<Tile>>;
     private static width: number = 0;
     private static height: number = 0;
-    private static selected_tile: Vector | null = null;
 
     public static makeGrid(width: number, height: number, terrain: string): void {
         this.tile_grid = [[]];
@@ -223,15 +219,5 @@ export class TileMapManager {
         const diff_owner_neighbours = this.getNeighbours(tile_position, (neighbour) => different_owner(neighbour));
 
         return diff_owner_neighbours.length > 0;
-    }
-
-    /** *TileMapManager.setSelectedTile(null)* */
-    public static unselectTile(): void {
-        this.setSelectedTile(null);
-    }
-
-    public static setSelectedTile(tile_pos: Vector | null): void {
-        this.selected_tile = tile_pos;
-        godMenuSelectTile(tile_pos ?? vectorMake(0, 0));
     }
 }
