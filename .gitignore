@@ -1,5 +1,9 @@
-# Ignore
+# Node modules
 node_modules/
-dev_textures/
+
+# Dependency cruiser reports and artifacts
 .dependency-cruiser.cjs
 dependency-graph.svg
+
+# Vitest reports and artifacts
+.vitest/
