@@ -1,7 +1,7 @@
-import { RenderManager } from "../render/.render";
-import { GameState } from "./game-state/.game-state";
-import { GameUpdate } from "./game-update/.game-update";
-import { InputState } from "./input/.input";
+import { RenderManager } from "../render/render.entry";
+import { GameState } from "./game-state/game-state.entry";
+import { GameUpdate } from "./game-update/game-update.entry";
+import { InputState } from "./input/input.entry";
 
 export class Game {
     private lastTick: number;

@@ -1,4 +1,4 @@
-import { GameState } from "../game-state/.game-state";
+import { GameState } from "../game-state/game-state.entry";
 import { CombatUpdater } from "./combat-update";
 import { DiplomacyUpdater } from "./diplomacy-update";
 import { MilitaryUpdater } from "./military-update";

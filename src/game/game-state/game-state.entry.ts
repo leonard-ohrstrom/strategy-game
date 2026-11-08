@@ -1,6 +1,6 @@
-import { Country } from "./countries/.country";
-import { Tile } from "./tile-map/.tile-map";
-import { Troop } from "./military/.military";
+import { Country } from "./countries/country.entry";
+import { Tile } from "./tile-map/tile-map.entry";
+import { Troop } from "./military/military.entry";
 import { GameSpeedManager, type GameSpeedNumber } from "./game-speed-manager";
 import { FileHandler } from "../../foundation/file-handler";
 

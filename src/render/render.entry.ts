@@ -1,4 +1,4 @@
-import { GameState } from "../game/game-state/.game-state";
+import { GameState } from "../game/game-state/game-state.entry";
 import { RenderEngine } from "./render-engine";
 import { type RenderOrder, RenderPlanner } from "./render-planner";
 

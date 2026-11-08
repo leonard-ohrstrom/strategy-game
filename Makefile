@@ -24,4 +24,4 @@ run:
 	npm run dev
 
 clean:
-	find ./src -type f -name "*.js" -delete
+	powershell -NoProfile -Command "Get-ChildItem -Path src -Filter '*.js' -File -Recurse | Remove-Item -Force"

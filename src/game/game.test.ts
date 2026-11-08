@@ -1,5 +1,5 @@
 import { expect, test, vi, beforeEach, afterEach } from 'vitest'
-import { Game } from './.game';
+import { Game } from './game.entry';
 
 //////////////
 /// Vitest ///

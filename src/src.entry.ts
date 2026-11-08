@@ -1,4 +1,4 @@
-import { Game } from "./game/.game";
+import { Game } from "./game/game.entry";
 
 export function boot(): void {
     const gameLoop: Game = new Game();

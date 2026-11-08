@@ -1,4 +1,4 @@
-import { Tile } from "./.tile-map";
+import { Tile } from "./tile-map.entry";
 import { FileHandler } from "../../../foundation/file-handler";
 
 type OwnerData = string | null;

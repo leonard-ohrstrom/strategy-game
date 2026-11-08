@@ -2,7 +2,7 @@
  * Manages each concrete instance of a country.
  */
 import { FileHandler } from "../../../foundation/file-handler.ts";
-import { Country } from "./.country.ts";
+import { Country } from "./country.entry.ts";
 
 type countryProperty = "name" | "color";
 type countryData = Record<countryProperty, string>

@@ -1,5 +1,5 @@
 import { Rectangle } from "../foundation/rectangle";
-import { GameState } from "../game/game-state/.game-state";
+import { GameState } from "../game/game-state/game-state.entry";
 
 export type RenderOrder = {
     texture: string,

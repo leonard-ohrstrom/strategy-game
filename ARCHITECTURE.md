@@ -12,7 +12,7 @@ The following naming conventions are used for files and data in the project:
 - **Type aliases** use *PascalCase*.
 - **Booleans** start with *is*, *has*, *can*, or *should*.
 
-* **Public entry points** are named *index.ts*.
+* **Public entry points** end with *.entry.ts*.
 
 True constants are fixed, broadly applicable values with a well-established meaning. Ordinary constants are values declared with const that are local to a particular implementation or context.
 
